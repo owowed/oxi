@@ -1,0 +1,78 @@
+name: Build & Publish Oxi
+
+on:
+  release:
+    types: published
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # -- pnpm caching
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # --
+
+      - name: Oxi Install & Build
+        run: |
+          pnpm i
+          pnpm run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: oxi-build
+          path: dist
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: oxi-build
+          path: dist
+      
+      - name: Create zip archive of dist files
+        id: archives
+        run: |
+          tag_version="${GITHUB_REF#refs/tags/}"
+          zip_archive="oxi-v$tag_version.zip"
+
+          zip -r9 "$zip_archive" dist/*
+
+          echo "zip_archive=$zip_archive" >> $GITHUB_OUTPUT
+          
+      - name: Upload release files
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.archives.outputs.zip_archive }}
