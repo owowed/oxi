@@ -59,7 +59,7 @@ jobs:
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
           git checkout --orphan dist
           
-          find . ! -name 'dist' -type f -exec rm -rf {} +
+          find . -mindepth 1 -maxdepth 1  ! -name 'dist' -type d -exec rm -rf {} +
           mv dist/* .
           rmdir dist/
 
