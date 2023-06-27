@@ -7,6 +7,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,7 +42,7 @@ jobs:
 
       # --
 
-      - name: Oxi Install & Build
+      - name: PNPM Install & Build
         run: |
           pnpm i
           pnpm run build
@@ -50,6 +52,16 @@ jobs:
         with:
           name: oxi-build
           path: dist
+
+      - name: Git subtree split 'dist/' to 'dist' branch
+        run: |
+          git config --global user.name '${{ github.actor }}'
+          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+          git subtree split --branch oxi-build --prefix dist/
+          git push -f origin oxi-build
+      
+      - name: Run tree
+        run: tree
   publish:
     needs: build
     runs-on: ubuntu-latest
@@ -76,3 +88,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.archives.outputs.zip_archive }}
+
+      - name: Run tree
+        run: tree
