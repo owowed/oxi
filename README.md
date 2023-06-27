@@ -4,14 +4,14 @@ JavaScript library that provide common tools, utilities, helpers to help and eas
 
 ## How to Use
 
-The main build of the library is available in the `dist` folder.
+The main build of the library is available in the `dist` branch. This branch will automatically be updated each time a release is published.
 
 To use this library, simply add the following lines to your userscript header:
 
 ```javascript
 // ==UserScript==
 // ...
-// @require   https://github.com/owowed/oxi/raw/main/dist/oxi.umd.js
+// @require   https://github.com/owowed/oxi/raw/dist/oxi.umd.js
 // ...
 // ==/UserScript==
 ```
