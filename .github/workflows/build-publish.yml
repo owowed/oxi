@@ -53,12 +53,17 @@ jobs:
           name: oxi-build
           path: dist
 
-      - name: Git subtree split 'dist/' to 'dist' branch
+      - name: Push all "dist/" files into "dist" branch
         run: |
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-          git subtree split --branch oxi-build --prefix dist/
-          git push -f origin oxi-build
+          git checkout --orphan dist
+          
+          find . ! -name 'dist' -type f -exec rm -rf {} +
+          mv dist/* .
+          rmdir dist/
+
+          git push -f origin dist
       
       - name: Run tree
         run: tree
