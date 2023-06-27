@@ -53,7 +53,7 @@ jobs:
           name: oxi-build
           path: dist
 
-      - name: Push all "dist/" files into "dist" branch
+      - name: Push "dist/" files into "dist" branch
         run: |
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
@@ -63,6 +63,8 @@ jobs:
           mv dist/* .
           rmdir dist/
 
+          git add .
+          git commit -m 'Push "dist/" files into "dist" branch'
           git push -f origin dist
       
       - name: Run tree
