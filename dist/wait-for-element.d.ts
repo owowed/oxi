@@ -1,9 +1,9 @@
 /**
- * Interface for options used in {@link waitForElementOptions}, used for configuring how its operation works.
+ * Interface for options used in {@link waitForElementByOptions}, used for configuring how its operation works.
  */
 export interface WaitForElementOptions {
     /**
-     * If set to true, it will select element by ID, and it will use the {@link document.documentElement} as the parent selector.
+     * If set to true, it will select element by ID, and it will use the {@link document.documentElement} as the parent selector. {@link WaitForElementOptions.parent} will not apply.
      *
      * This option will precede any other options, such as {@link WaitForElementOptions.multiple} option and the {@link WaitForElementOptions.selector} option, meaning the operation will always select element by the ID specified by {@link WaitForElementOptions.id} option, even if {@link WaitForElementOptions.multiple} or {@link WaitForElementOptions.selector} option is set.
      */
@@ -14,6 +14,8 @@ export interface WaitForElementOptions {
      * If set to `string[]`, then it will query select single element for each selector in the array, returning array of element.
      *
      * If {@link WaitForElementOptions.multiple} option is set to true, then it will query select all element for each selector in array, and then combines them into one, returning array of element.
+     * @see {@link WaitForElementOptions.parent} for limiting the scope of query selector
+     * @see {@link WaitForElementOptions.id} for getting element only by ID
      */
     selector?: string | string[];
     /**
@@ -42,6 +44,7 @@ export interface WaitForElementOptions {
      * Set the timeout in millisecond. Default timeout is 5 seconds.
      *
      * This option will do nothing if {@link WaitForElementOptions.enableTimeout} is set to false.
+     * @see {@link WaitForElementOptions.enableTimeout}
      */
     timeout?: number;
     /**
@@ -59,11 +62,11 @@ export interface WaitForElementOptions {
      */
     observerOptions?: MutationObserverInit;
     /**
-     * Filter the target elements before being returned.
+     * Filter the target element(s) before being returned.
      */
     filter?: (elem: Element | null) => boolean;
     /**
-     * Transform the target elements before being returned.
+     * Transform the target element(s) before being returned.
      */
     transform?: (elem: Element | null) => Element;
 }
@@ -71,10 +74,12 @@ export type WaitForElementReturnType = HTMLElement | HTMLElement[] | null;
 /**
  * Wait and get element that is not yet available in DOM by using element's ID asyncronously. It will use {@link document.getElementById} internally for getting the element.
  *
- * This is a simple wrapper around {@link waitForElementOptions}.
+ * This is a simple wrapper around {@link waitForElementByOptions}.
  * @param id specify element's ID value
- * @param options specify additional options for {@link waitForElementOptions}
+ * @param options specify additional options for {@link waitForElementByOptions}
  * @returns element with specified ID or null if element not found or something went wrong
+ * @see {@link WaitForElementOptions}
+ * @see {@link waitForElementByOptions}
  */
 export declare function waitForElementById(id: string): Promise<Element | null>;
 /**
@@ -84,11 +89,13 @@ export declare function waitForElementById(id: string): Promise<Element | null>;
  *
  * This may help optimize performance, searching element through specific scope of another element instead of the entire document.
  *
- * This is a simple wrapper around {@link waitForElementOptions}.
+ * This is a simple wrapper around {@link waitForElementByOptions}.
  * @param parent specify scope for target element query selection by parent element
  * @param selector specify selector for the target element
- * @param options specify additional options for {@link waitForElementOptions}
+ * @param options specify additional options for {@link waitForElementByOptions}
  * @returns return multiple elements in {@link Array}, a single element or null depending on the parameters
+ * @see {@link WaitForElementOptions}
+ * @see {@link waitForElementByOptions}
  */
 export declare function waitForElementByParent<S extends keyof HTMLElementTagNameMap>(parent: ParentNode, selector: S, options?: WaitForElementOptions & {
     multiple: false;
@@ -105,10 +112,12 @@ export declare function waitForElementByParent(parent: ParentNode, selector: str
 /**
  * Wait for element that is not available yet in the DOM asyncronously, then return that element.
  *
- * This is a simple wrapper around {@link waitForElementOptions}.
+ * This is a simple wrapper around {@link waitForElementByOptions}.
  * @param selector specify selector for the target element
- * @param options specify additional options for {@link waitForElementOptions}
+ * @param options specify additional options for {@link waitForElementByOptions}
  * @returns return multiple elements in {@link Array}, a single element or null depending on the parameters
+ * @see {@link WaitForElementOptions}
+ * @see {@link waitForElementByOptions}
  */
 export declare function waitForElement<S extends keyof HTMLElementTagNameMap>(selector: S, options?: WaitForElementOptions & {
     multiple: false;
@@ -127,25 +136,27 @@ export declare function waitForElement(selector: string[], options?: WaitForElem
  *
  * This operation works by listening for DOM (or an parent element specified by {@link WaitForElementOptions.parent}) subtree changes using {@link MutationObserver}, then execute element selection each time changes happen.
  *
- * If an element not found, then it will attempt to retry the same operation again. This repetition can be controlled by using {@link WaitForElementOptions.maxTries}, {@link WaitForElementOptions.timeout}, and etc.
+ * If an element not found, then it will attempt to retry the same operation again. This can be controlled by using {@link WaitForElementOptions.maxTries}, {@link WaitForElementOptions.timeout}, and etc.
  *
- * Behavior described here may not be accurate if options is specifically configured.
+ * Behavior described here may not be accurate if options are specifically configured.
  *
  * @param options configure how the operation works by specifying options
  * @returns depending on the options, it may return multiple elements in {@link Array}, a single element, or null if element not found or something went wrong
+ * @see {@link WaitForElementOptions}
+ * @see {@link waitForElement}
  */
-export declare function waitForElementOptions<S extends keyof HTMLElementTagNameMap>(options: WaitForElementOptions & {
+export declare function waitForElementByOptions<S extends keyof HTMLElementTagNameMap>(options: WaitForElementOptions & {
     selector: S;
     multiple: false;
 }): Promise<HTMLElementTagNameMap[S] | null>;
-export declare function waitForElementOptions(options: WaitForElementOptions & ({
+export declare function waitForElementByOptions(options: WaitForElementOptions & ({
     multiple: false;
 } | {
     id: string;
 })): Promise<Element | null>;
-export declare function waitForElementOptions(options: WaitForElementOptions & {
+export declare function waitForElementByOptions(options: WaitForElementOptions & {
     multiple: true;
 }): Promise<Element[] | null>;
-export declare function waitForElementOptions(options: WaitForElementOptions & {
+export declare function waitForElementByOptions(options: WaitForElementOptions & {
     selector: string[];
 }): Promise<Element[] | null>;
