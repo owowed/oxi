@@ -32,6 +32,8 @@ At the moment, documentation about how these methods work are available inside t
 
 If you have any ideas for new userscripts or improvements to existing ones, feel free to fork this repository and submit a pull request.
 
+Please follow [Angular's Commit Message Format guidelines](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) when contributing.
+
 ## License
 
 This repository and all of its libraries are licensed under [GNU LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html), a free and open-source license. For more information, please see the [license file](https://github.com/owowed/userscript-common/blob/main/LICENSE.txt).
