@@ -4,7 +4,7 @@ JavaScript package that provide common tools, utilities, helpers to help and eas
 
 ## How to Use
 
-The main build of the package is available in the `dist` branch. This branch will automatically update each time a release is published.
+The release build of the package is available in the [`dist`](https://github.com/owowed/oxi/tree/dist) branch. This branch will automatically update each time a release is published.
 
 To use this package, simply add the following lines to your userscript header:
 
