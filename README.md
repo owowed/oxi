@@ -1,6 +1,6 @@
 # oxi
 
-JavaScript library that provide common tools, utilities, helpers to help and ease the development of userscript.
+JavaScript package that provide common tools, utilities, helpers to help and ease the development of userscript.
 
 ## How to Use
 
