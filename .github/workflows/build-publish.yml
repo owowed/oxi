@@ -52,11 +52,18 @@ jobs:
         with:
           name: oxi-build
           path: dist
-
-      - name: Push "dist/" files into "dist" branch
+          
+      - name: Setup Git
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      
+      - name: Push dist/ folder into master branch
+        run: |
+          git status
+
+      - name: Push dist/* files into dist branch
+        run: |
           git checkout --orphan dist
           
           find . -mindepth 1 -maxdepth 1  ! -name 'dist' ! -name '.git' -type d -exec rm -rf {} +
@@ -64,7 +71,7 @@ jobs:
           rmdir dist/
 
           git add .
-          git commit -m 'Push dist files to dist branch'
+          git commit -m 'Push dist/ files to dist branch'
           git push -f origin dist
       
       - name: Run tree
@@ -84,8 +91,7 @@ jobs:
       - name: Create zip archive of dist files
         id: archives
         run: |
-          tag_version="${GITHUB_REF#refs/tags/}"
-          zip_archive="oxi-v$tag_version.zip"
+          zip_archive="oxi-$GITHUB_REF_NAME.zip"
 
           zip -r9 "$zip_archive" dist/*
 
