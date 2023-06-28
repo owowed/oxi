@@ -4,7 +4,7 @@ JavaScript package that provide common tools, utilities, helpers to help and eas
 
 ## How to Use
 
-The main build of the package is available in the `dist` branch. This branch will automatically be updated each time a release is published.
+The main build of the package is available in the `dist` branch. This branch will automatically update each time a release is published.
 
 To use this package, simply add the following lines to your userscript header:
 
@@ -26,7 +26,7 @@ const observer = oxi.makeMutationObserver({ target: element },
 
 ## Docs
 
-At the moment, documentation about how these methods work are available inside the source code in `src` as JSDoc comments.
+At the moment, documentation about these methods are available inside the source code in `src` as JSDoc comments.
 
 ## Contributing
 
@@ -36,4 +36,4 @@ Please follow [Angular's Commit Message Format guidelines](https://github.com/an
 
 ## License
 
-This project is licensed under [GNU LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html), a free and open-source license. For more information, please see the [license file](https://github.com/owowed/userscript-common/blob/main/LICENSE.txt).
+This project is licensed under [GNU LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html), a free and open-source license. For more information, please see the [license file](./LICENSE).
