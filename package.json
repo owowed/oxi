@@ -1,6 +1,6 @@
 {
   "name": "oxi",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Userscript library",
   "author": "owowed",
   "license": "LGPL-3.0",
@@ -8,10 +8,13 @@
   "main": "dist/oxi.umd.js",
   "module": "dist/oxi.es.js",
   "exports": {
-    "import": "./dist/oxi.es.js",
-    "require": "./dist/oxi.umd.js",
-    "types": "./dist/index.d.ts"
+    ".": {
+      "import": "./dist/oxi.es.js",
+      "require": "./dist/oxi.umd.js",
+      "types": "./dist/index.d.ts"
+    }
   },
+  "files": [ "./dist" ],
   "scripts": {
     "build": "npx vite build && npx tsc --emitDeclarationOnly"
   },
