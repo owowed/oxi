@@ -19,6 +19,14 @@
     "build": "npx vite build && npx tsc --emitDeclarationOnly"
   },
   "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owowed/oxi.git",
+    "directory": "."
+  },
+  "engines": {
+    "node": "^16.14.0 || >=18.10.0"
+  },
   "dependencies": {
   },
   "devDependencies": {
