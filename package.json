@@ -20,6 +20,8 @@
   },
   "keywords": [],
   "dependencies": {
+  },
+  "devDependencies": {
     "@types/node": "^20.3.0",
     "prettier": "^2.8.8",
     "tslib": "^2.5.3",
