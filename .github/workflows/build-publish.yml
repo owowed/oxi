@@ -64,7 +64,7 @@ jobs:
           rmdir dist/
 
           git add .
-          git commit -m 'Push "dist/" files into "dist" branch'
+          git commit -m 'Push dist files to dist branch'
           git push -f origin dist
       
       - name: Run tree
