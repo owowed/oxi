@@ -20,7 +20,8 @@ All methods are contained within `oxi` namespace, you should be able to use one 
 
 ```javascript
 const element = await oxi.waitForElement("div.hello-world");
-const observer = oxi.makeMutationObserver({ target: element },
+const observer = oxi.makeMutationObserver(
+    { target: element },
     ({ records }) => console.log("Mutation detected: ", records));
 ```
 
