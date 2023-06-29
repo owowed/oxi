@@ -45,7 +45,7 @@ jobs:
 
       - name: Update package branch from master and new dist files
         run: |
-          git checkout --orphan package
+          git checkout -b package
           git add .
           git commit -m "build: update ${{ steps.release-info.outputs.tag_name }} files"
           git push -f origin package
