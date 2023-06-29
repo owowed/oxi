@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  build:
+  push-dist:
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -14,55 +14,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      # -- pnpm caching
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      # --
-
-      - name: PNPM Install & Build
-        run: |
-          pnpm i
-          pnpm run build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: oxi-build
-          path: dist
+      - name: Build Oxi
+        uses: ./.github/actions/build
           
       - name: Setup Git
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-      
-      - name: Push dist/ folder into master branch
-        run: |
-          git status
+        uses: ./.github/actions/setup-git
 
-      - name: Push dist/* files into dist branch
+      - name: Push dist files into dist branch
         run: |
           git checkout --orphan dist
           
@@ -73,25 +31,22 @@ jobs:
           git add .
           git commit -m 'Push dist/ files to dist branch'
           git push -f origin dist
-      
-      - name: Run tree
-        run: tree
-  publish:
-    needs: build
+
+  upload-release-files:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: oxi-build
-          path: dist
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Oxi
+        uses: ./.github/actions/build
       
       - name: Create zip archive of dist files
         id: archives
         run: |
-          zip_archive="oxi-$GITHUB_REF_NAME.zip"
+          zip_archive="oxi-dist-$GITHUB_REF_NAME.zip"
 
           zip -r9 "$zip_archive" dist/*
 
@@ -101,6 +56,3 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.archives.outputs.zip_archive }}
-
-      - name: Run tree
-        run: tree
