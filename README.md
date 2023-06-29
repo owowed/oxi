@@ -28,11 +28,13 @@ const observer = oxi.makeMutationObserver({ target: element },
 
 At the moment, documentation about these methods are available inside the source code in `src` as JSDoc comments.
 
+For upcoming release tag of this package, see the [`package`](https://github.com/owowed/oxi/tree/package).
+
 ## Contributing
 
 If you have any ideas for new userscripts or improvements to existing ones, feel free to fork this repository and submit a pull request.
 
-Please follow [Angular's Commit Message Format guidelines](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) when contributing.
+For commit message, we follow very similiar style to [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format).
 
 ## License
 
