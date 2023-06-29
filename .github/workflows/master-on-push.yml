@@ -16,24 +16,36 @@ jobs:
         uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-  push-dist:
+        with:
+          commitish: refs/heads/package
+
+  update-package:
+    needs: release-draft
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        
+      - name: Build Oxi
+        uses: ./.github/actions/build
+        
+      - name: Setup Git
+        uses: ./.github/actions/setup-git
 
-      - run: tree
-
-      - name: oxi-build
-        uses: ./.github/workflows/build.yml
-      
-      - name: Download oxi-build artifact
-        uses: actions/download-artifact@v3
+      - name: Get latest draft release information
+        id: release-info
+        uses: cardinalby/git-get-release-action@v1
         with:
-          name: oxi-build
-      
-      - name: git status
-        run: git status
+          latest: true
+          draft: true
+
+      - name: Update package branch from master and new dist files
+        run: |
+          git checkout --orphan package
+          git add .
+          git commit -m "build: update ${{ steps.release-info.outputs.tag_name }} files"
+          git push -f origin package
