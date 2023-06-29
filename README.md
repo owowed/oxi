@@ -29,7 +29,7 @@ const observer = oxi.makeMutationObserver(
 
 At the moment, documentation about these methods are available inside the source code in `src` as JSDoc comments.
 
-For upcoming release tag of this package, see the [`package`](https://github.com/owowed/oxi/tree/package).
+For upcoming release tag of this package, see the [`package`](https://github.com/owowed/oxi/tree/package) branch.
 
 ## Contributing
 
