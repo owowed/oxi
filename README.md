@@ -1,6 +1,6 @@
-<h1>oxi</h1>
+<h1 align="center">oxi</h1>
 
-<div id="summary">JavaScript package that provide common tools, utilities, helpers to help and ease the development of userscript.</div>
+<div align="center">JavaScript package that provide common tools, utilities, helpers to help and ease the development of userscript.</div>
 
 ## How to Use
 
@@ -42,11 +42,3 @@ See [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md) for guidelines and document
 ## License
 
 This project is licensed under [GNU LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html), a free and open-source license. For more information, please see the [license file](./LICENSE).
-
-<style>
-
-h1, #summary {
-    text-align: center;
-}
-
-</style>
