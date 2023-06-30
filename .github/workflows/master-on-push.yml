@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch: {}
 
 jobs:
   release-draft:
@@ -16,11 +17,14 @@ jobs:
         uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          commitish: refs/heads/package
+
+  build-oxi:
+    uses: ./.github/workflows/build-oxi.yml
 
   update-package:
-    needs: release-draft
+    needs:
+      - release-draft # getting latest release info
+      - build-oxi
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -29,12 +33,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
-      - name: Build Oxi
-        uses: ./.github/actions/build
-        
+
       - name: Setup Git
         uses: ./.github/actions/setup-git
+
+      - name: Create package branch if it doesn't exist
+        run: |
+          if ! git ls-remote | grep 'refs/heads/package$'; then
+            git switch -c package
+            git push origin package;
+          else
+            echo package branch already exist;
+          fi
+
+      - name: Checkout to package
+        uses: actions/checkout@v3
+        with:
+          ref: package
+          fetch-depth: 0
+
+      - name: Merge master to package
+        run: |
+          git merge origin/master --no-commit -X theirs
+          git commit -m "build: merge master to package" &&
+          git push -f origin package || true
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: oxi-dist
+          path: ./dist
 
       - name: Get latest draft release information
         id: release-info
@@ -42,10 +70,12 @@ jobs:
         with:
           latest: true
           draft: true
-
-      - name: Update package branch from master and new dist files
+        
+      - name: Push dist files into package branch
         run: |
-          git checkout -b package
-          git add .
-          git commit -m "build: update ${{ steps.release-info.outputs.tag_name }} files"
-          git push -f origin package
+          # Commit dist folder from the dist artifact
+          git add -A
+          git commit -m "build: update ${{ steps.release-info.outputs.tag_name }} files" || true
+
+          # Push all changes
+          git push origin package
