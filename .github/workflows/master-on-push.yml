@@ -1,4 +1,4 @@
-name: Master Branch On Push
+name: Master On Push Automation
 
 on:
   push:
@@ -55,7 +55,7 @@ jobs:
       - name: Merge master to package
         run: |
           git merge origin/master --no-commit -X theirs
-          git commit -m "build: merge master to package" &&
+          git commit -m "build: merge master to package (auto)" &&
           git push -f origin package || true
 
       - name: Download dist artifact
@@ -75,7 +75,7 @@ jobs:
         run: |
           # Commit dist folder from the dist artifact
           git add -A
-          git commit -m "build: update ${{ steps.release-info.outputs.tag_name }} files" || true
+          git commit -m "build: update ${{ steps.release-info.outputs.tag_name }} files (auto)" || true
 
           # Push all changes
           git push origin package
