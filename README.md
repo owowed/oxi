@@ -1,6 +1,14 @@
-# oxi
+<style>
 
-JavaScript package that provide common tools, utilities, helpers to help and ease the development of userscript.
+h1, #summary {
+    text-align: center;
+}
+
+</style>
+
+<h1>oxi</h1>
+
+<div id="summary">JavaScript package that provide common tools, utilities, helpers to help and ease the development of userscript.</div>
 
 ## How to Use
 
