@@ -37,6 +37,8 @@ If you have any ideas for new userscripts or improvements to existing ones, feel
 
 For commit message, we follow very similiar style to [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format).
 
+See [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md) for guidelines and documentation.
+
 ## License
 
 This project is licensed under [GNU LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html), a free and open-source license. For more information, please see the [license file](./LICENSE).
