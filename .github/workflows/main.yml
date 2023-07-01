@@ -66,6 +66,7 @@ jobs:
           git push -f origin package || true
 
       - name: NPM bump version
+        continue-on-error: true
         run: |
           npm version ${{ steps.release-info.outputs.tag_name }} --no-git-tag-version
 
