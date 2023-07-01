@@ -86,7 +86,7 @@ export type WaitForElementReturnType = HTMLElement | HTMLElement[] | null;
  * @see {@link WaitForElementOptions}
  * @see {@link waitForElementByOptions}
  */
-export function waitForElementById(id: string): Promise<Element | null> {
+export function waitForElementById<E extends Element>(id: string): Promise<E | null> {
     return waitForElementByOptions({ id })
 }
 
@@ -106,9 +106,9 @@ export function waitForElementById(id: string): Promise<Element | null> {
  * @see {@link waitForElementByOptions}
  */
 export function waitForElementByParent<S extends keyof HTMLElementTagNameMap>(parent: ParentNode, selector: S, options?: WaitForElementOptions & { multiple: false }): Promise<HTMLElementTagNameMap[S] | null>;
-export function waitForElementByParent(parent: ParentNode, selector: string, options?: WaitForElementOptions & ({ multiple: false } | { id: string })): Promise<HTMLElement | null>;
-export function waitForElementByParent(parent: ParentNode, selector: string, options?: WaitForElementOptions & { multiple: true }): Promise<HTMLElement[] | null>;
-export function waitForElementByParent(parent: ParentNode, selector: string[], options?: WaitForElementOptions): Promise<HTMLElement[] | null>;
+export function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: WaitForElementOptions & ({ multiple: false } | { id: string })): Promise<E | null>;
+export function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: WaitForElementOptions & { multiple: true }): Promise<E[] | null>;
+export function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string[], options?: WaitForElementOptions): Promise<E[] | null>;
 export function waitForElementByParent(parent: any, selector: any, options: any = {}): any {
     return waitForElementByOptions({ selector, parent, ...options });
 }
@@ -124,9 +124,9 @@ export function waitForElementByParent(parent: any, selector: any, options: any 
  * @see {@link waitForElementByOptions}
  */
 export function waitForElement<S extends keyof HTMLElementTagNameMap>(selector: S, options?: WaitForElementOptions & { multiple: false }): HTMLElementTagNameMap[S] | null;
-export function waitForElement(selector: string, options?: WaitForElementOptions & ({ multiple: false } | { id: string })): Promise<Element | null>;
-export function waitForElement(selector: string, options?: WaitForElementOptions & { multiple: true }): Promise<Element[] | null>;
-export function waitForElement(selector: string[], options?: WaitForElementOptions): Promise<Element[] | null>;
+export function waitForElement<E extends Element>(selector: string, options?: WaitForElementOptions & ({ multiple: false } | { id: string })): Promise<E | null>;
+export function waitForElement<E extends Element>(selector: string, options?: WaitForElementOptions & { multiple: true }): Promise<E[] | null>;
+export function waitForElement<E extends Element>(selector: string[], options?: WaitForElementOptions): Promise<E[] | null>;
 export function waitForElement(selector: any, options: any = {}): any {
     return waitForElementByOptions({ selector, ...options });
 }
@@ -146,9 +146,9 @@ export function waitForElement(selector: any, options: any = {}): any {
  * @see {@link waitForElement}
  */
 export function waitForElementByOptions<S extends keyof HTMLElementTagNameMap>(options: WaitForElementOptions & { selector: S; multiple: false }): Promise<HTMLElementTagNameMap[S] | null>;
-export function waitForElementByOptions(options: WaitForElementOptions & ({ multiple: false } | { id: string })): Promise<Element | null>;
-export function waitForElementByOptions(options: WaitForElementOptions & { multiple: true }): Promise<Element[] | null>;
-export function waitForElementByOptions(options: WaitForElementOptions & { selector: string[] }): Promise<Element[] | null>;
+export function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & ({ multiple: false } | { id: string })): Promise<E | null>;
+export function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & { multiple: true }): Promise<E[] | null>;
+export function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & { selector: string[] }): Promise<E[] | null>;
 export function waitForElementByOptions(
     { id,
         selector,
