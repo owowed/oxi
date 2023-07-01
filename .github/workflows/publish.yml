@@ -1,4 +1,4 @@
-name: Build & Publish Oxi
+name: Publish Package
 
 on:
   release:
