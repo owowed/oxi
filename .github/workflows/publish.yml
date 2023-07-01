@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-oxi:
-    uses: ./.github/workflows/build-oxi.yml
+    uses: ./.github/workflows/build.yml
 
   push-dist:
     needs: build-oxi

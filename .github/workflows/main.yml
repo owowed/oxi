@@ -19,7 +19,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-oxi:
-    uses: ./.github/workflows/build-oxi.yml
+    uses: ./.github/workflows/build.yml
 
   update-package:
     needs:
