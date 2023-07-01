@@ -37,7 +37,7 @@ For upcoming release tag of this package, see the [`package`](https://github.com
 
 ## Contributing
 
-If you have any ideas for new userscripts or improvements to existing ones, feel free to fork this repository and submit a pull request.
+If you have any ideas or suggestions for improvements, feel free to fork this repository and submit a pull request.
 
 For commit message, we follow very similiar style to [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format).
 
