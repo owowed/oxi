@@ -10,7 +10,9 @@
 
 ## Commit Message Format
 
-We follow similar format to [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format).
+We follow strictly to [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/) for our commit message format.
+
+We also recommend [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) and other conventions for some area.
 
 ## Release
 
