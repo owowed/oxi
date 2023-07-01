@@ -81,7 +81,7 @@ export type WaitForElementReturnType = HTMLElement | HTMLElement[] | null;
  * @see {@link WaitForElementOptions}
  * @see {@link waitForElementByOptions}
  */
-export declare function waitForElementById(id: string): Promise<Element | null>;
+export declare function waitForElementById<E extends Element>(id: string): Promise<E | null>;
 /**
  * Wait for element that is not available yet in the DOM asyncronously, then return that element.
  *
@@ -100,15 +100,15 @@ export declare function waitForElementById(id: string): Promise<Element | null>;
 export declare function waitForElementByParent<S extends keyof HTMLElementTagNameMap>(parent: ParentNode, selector: S, options?: WaitForElementOptions & {
     multiple: false;
 }): Promise<HTMLElementTagNameMap[S] | null>;
-export declare function waitForElementByParent(parent: ParentNode, selector: string, options?: WaitForElementOptions & ({
+export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: WaitForElementOptions & ({
     multiple: false;
 } | {
     id: string;
-})): Promise<HTMLElement | null>;
-export declare function waitForElementByParent(parent: ParentNode, selector: string, options?: WaitForElementOptions & {
+})): Promise<E | null>;
+export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: WaitForElementOptions & {
     multiple: true;
-}): Promise<HTMLElement[] | null>;
-export declare function waitForElementByParent(parent: ParentNode, selector: string[], options?: WaitForElementOptions): Promise<HTMLElement[] | null>;
+}): Promise<E[] | null>;
+export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string[], options?: WaitForElementOptions): Promise<E[] | null>;
 /**
  * Wait for element that is not available yet in the DOM asyncronously, then return that element.
  *
@@ -122,15 +122,15 @@ export declare function waitForElementByParent(parent: ParentNode, selector: str
 export declare function waitForElement<S extends keyof HTMLElementTagNameMap>(selector: S, options?: WaitForElementOptions & {
     multiple: false;
 }): HTMLElementTagNameMap[S] | null;
-export declare function waitForElement(selector: string, options?: WaitForElementOptions & ({
+export declare function waitForElement<E extends Element>(selector: string, options?: WaitForElementOptions & ({
     multiple: false;
 } | {
     id: string;
-})): Promise<Element | null>;
-export declare function waitForElement(selector: string, options?: WaitForElementOptions & {
+})): Promise<E | null>;
+export declare function waitForElement<E extends Element>(selector: string, options?: WaitForElementOptions & {
     multiple: true;
-}): Promise<Element[] | null>;
-export declare function waitForElement(selector: string[], options?: WaitForElementOptions): Promise<Element[] | null>;
+}): Promise<E[] | null>;
+export declare function waitForElement<E extends Element>(selector: string[], options?: WaitForElementOptions): Promise<E[] | null>;
 /**
  * Wait for element that is not available yet in the DOM asyncronously, then return that element.
  *
@@ -149,14 +149,14 @@ export declare function waitForElementByOptions<S extends keyof HTMLElementTagNa
     selector: S;
     multiple: false;
 }): Promise<HTMLElementTagNameMap[S] | null>;
-export declare function waitForElementByOptions(options: WaitForElementOptions & ({
+export declare function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & ({
     multiple: false;
 } | {
     id: string;
-})): Promise<Element | null>;
-export declare function waitForElementByOptions(options: WaitForElementOptions & {
+})): Promise<E | null>;
+export declare function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & {
     multiple: true;
-}): Promise<Element[] | null>;
-export declare function waitForElementByOptions(options: WaitForElementOptions & {
+}): Promise<E[] | null>;
+export declare function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & {
     selector: string[];
-}): Promise<Element[] | null>;
+}): Promise<E[] | null>;
