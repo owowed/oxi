@@ -1,12 +1,14 @@
 <h1 align="center">oxi</h1>
 
-<div align="center">JavaScript package that provide common tools, utilities, helpers to help and ease the development of userscript.</div>
+<div align="center">A comprehensive JavaScript package providing essential tools, utilities, and helpers to streamline the development of userscripts.</div>
 
-## How to Use
+## Getting Started
 
-The release build of the package is available in the [`dist`](https://github.com/owowed/oxi/tree/dist) branch. This branch will automatically update each time a release is published.
+To start using the oxi package, you need to include it in your userscript header.
 
-To use this package, simply add the following lines to your userscript header:
+The release build of the package is available in the [`dist`](https://github.com/owowed/oxi/tree/dist) branch, which is updated automatically each time a new release is published.
+
+To include this package, simply add the following lines to your userscript header:
 
 ```javascript
 // ==UserScript==
@@ -16,7 +18,9 @@ To use this package, simply add the following lines to your userscript header:
 // ==/UserScript==
 ```
 
-All methods are contained within `oxi` namespace, you should be able to use one of `oxi`'s method like this:
+## Usage
+
+All methods are organized within `oxi` namespace. Here is an example on how to use one of the `oxi` methods:
 
 ```javascript
 const element = await oxi.waitForElement("div.hello-world");
