@@ -1,4 +1,4 @@
-name: Build Oxi
+name: Build Package
 
 on:
   workflow_call: {}

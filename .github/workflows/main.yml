@@ -1,4 +1,4 @@
-name: Master On Push Automation
+name: Main Action
 
 on:
   push:
