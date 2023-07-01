@@ -71,6 +71,18 @@ export interface WaitForElementOptions {
     transform?: (elem: Element | null) => Element;
 }
 export type WaitForElementReturnType = HTMLElement | HTMLElement[] | null;
+type SingleElementOptions = WaitForElementOptions & ({
+    multiple: false;
+} | {
+    id: string;
+});
+type ArrayElementOptions = WaitForElementOptions & {
+    multiple: true;
+};
+type SingleElementTagNameOptions<T extends keyof HTMLElementTagNameMap> = WaitForElementOptions & {
+    selector: T;
+    multiple: false;
+};
 /**
  * Wait and get element that is not yet available in DOM by using element's ID asyncronously. It will use {@link document.getElementById} internally for getting the element.
  *
@@ -97,17 +109,10 @@ export declare function waitForElementById<E extends Element>(id: string): Promi
  * @see {@link WaitForElementOptions}
  * @see {@link waitForElementByOptions}
  */
-export declare function waitForElementByParent<S extends keyof HTMLElementTagNameMap>(parent: ParentNode, selector: S, options?: WaitForElementOptions & {
-    multiple: false;
-}): Promise<HTMLElementTagNameMap[S] | null>;
-export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: WaitForElementOptions & ({
-    multiple: false;
-} | {
-    id: string;
-})): Promise<E | null>;
-export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: WaitForElementOptions & {
-    multiple: true;
-}): Promise<E[] | null>;
+export declare function waitForElementByParent<T extends keyof HTMLElementTagNameMap>(parent: ParentNode, selector: T, options?: SingleElementTagNameOptions<T>): Promise<HTMLElementTagNameMap[T] | null>;
+export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: SingleElementOptions): Promise<E | null>;
+export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: ArrayElementOptions): Promise<E[] | null>;
+export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string, options?: WaitForElementOptions): Promise<E | null>;
 export declare function waitForElementByParent<E extends Element>(parent: ParentNode, selector: string[], options?: WaitForElementOptions): Promise<E[] | null>;
 /**
  * Wait for element that is not available yet in the DOM asyncronously, then return that element.
@@ -119,17 +124,10 @@ export declare function waitForElementByParent<E extends Element>(parent: Parent
  * @see {@link WaitForElementOptions}
  * @see {@link waitForElementByOptions}
  */
-export declare function waitForElement<S extends keyof HTMLElementTagNameMap>(selector: S, options?: WaitForElementOptions & {
-    multiple: false;
-}): HTMLElementTagNameMap[S] | null;
-export declare function waitForElement<E extends Element>(selector: string, options?: WaitForElementOptions & ({
-    multiple: false;
-} | {
-    id: string;
-})): Promise<E | null>;
-export declare function waitForElement<E extends Element>(selector: string, options?: WaitForElementOptions & {
-    multiple: true;
-}): Promise<E[] | null>;
+export declare function waitForElement<T extends keyof HTMLElementTagNameMap>(selector: T, options?: SingleElementTagNameOptions<T>): Promise<HTMLElementTagNameMap[T] | null>;
+export declare function waitForElement<E extends Element>(selector: string, options?: SingleElementOptions): Promise<E | null>;
+export declare function waitForElement<E extends Element>(selector: string, options?: ArrayElementOptions): Promise<E[] | null>;
+export declare function waitForElement<E extends Element>(selector: string, options?: WaitForElementOptions): Promise<E | null>;
 export declare function waitForElement<E extends Element>(selector: string[], options?: WaitForElementOptions): Promise<E[] | null>;
 /**
  * Wait for element that is not available yet in the DOM asyncronously, then return that element.
@@ -145,18 +143,13 @@ export declare function waitForElement<E extends Element>(selector: string[], op
  * @see {@link WaitForElementOptions}
  * @see {@link waitForElement}
  */
-export declare function waitForElementByOptions<S extends keyof HTMLElementTagNameMap>(options: WaitForElementOptions & {
-    selector: S;
-    multiple: false;
-}): Promise<HTMLElementTagNameMap[S] | null>;
-export declare function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & ({
-    multiple: false;
-} | {
-    id: string;
-})): Promise<E | null>;
+export declare function waitForElementByOptions<T extends keyof HTMLElementTagNameMap>(options: SingleElementTagNameOptions<T>): Promise<HTMLElementTagNameMap[T] | null>;
+export declare function waitForElementByOptions<E extends Element>(options: SingleElementOptions): Promise<E | null>;
+export declare function waitForElementByOptions<E extends Element>(options: ArrayElementOptions): Promise<E[] | null>;
 export declare function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & {
-    multiple: true;
-}): Promise<E[] | null>;
+    selector: string;
+}): Promise<E | null>;
 export declare function waitForElementByOptions<E extends Element>(options: WaitForElementOptions & {
     selector: string[];
 }): Promise<E[] | null>;
+export {};
