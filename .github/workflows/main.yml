@@ -18,13 +18,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-oxi:
+  build:
     uses: ./.github/workflows/build.yml
 
   update-package:
     needs:
       - release-draft # getting latest release info
-      - build-oxi
+      - build
     runs-on: ubuntu-latest
     permissions:
       contents: write

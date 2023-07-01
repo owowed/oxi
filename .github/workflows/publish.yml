@@ -6,11 +6,11 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  build-oxi:
+  build:
     uses: ./.github/workflows/build.yml
 
   push-dist:
-    needs: build-oxi
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -40,7 +40,7 @@ jobs:
           git push -f origin dist
 
   upload-release-files:
-    needs: build-oxi
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
