@@ -1,14 +1,14 @@
-var M = Object.defineProperty;
-var T = (t, r, e) => r in t ? M(t, r, { enumerable: !0, configurable: !0, writable: !0, value: e }) : t[r] = e;
-var c = (t, r, e) => (T(t, typeof r != "symbol" ? r + "" : r, e), e), x = (t, r, e) => {
+var L = Object.defineProperty;
+var T = (t, r, e) => r in t ? L(t, r, { enumerable: !0, configurable: !0, writable: !0, value: e }) : t[r] = e;
+var a = (t, r, e) => (T(t, typeof r != "symbol" ? r + "" : r, e), e), M = (t, r, e) => {
   if (!r.has(t))
     throw TypeError("Cannot " + e);
 };
-var i = (t, r, e) => (x(t, r, "read from private field"), e ? e.call(t) : r.get(t)), p = (t, r, e) => {
+var i = (t, r, e) => (M(t, r, "read from private field"), e ? e.call(t) : r.get(t)), g = (t, r, e) => {
   if (r.has(t))
     throw TypeError("Cannot add the same private member more than once");
   r instanceof WeakSet ? r.add(t) : r.set(t, e);
-}, l = (t, r, e, s) => (x(t, r, "write to private field"), s ? s.call(t, e) : r.set(t, e), e);
+}, u = (t, r, e, s) => (M(t, r, "write to private field"), s ? s.call(t, e) : r.set(t, e), e);
 const HTMLEntityMap = {
   "&": "&amp;",
   "<": "&lt;",
@@ -38,48 +38,48 @@ function escapeRegExp(t) {
 function formatString(t, r, { subst: e = { format: "${{ | }}", var: "|" } } = {}) {
   const s = e.format.split(e.var).map(escapeRegExp).join(String.raw`([$\w\d-_.: ]+)`);
   return t.replace(new RegExp(s, "g"), (n, o) => {
-    var a;
-    return (a = r[o]) == null ? void 0 : a.toString();
+    var d;
+    return (d = r[o]) == null ? void 0 : d.toString();
   });
 }
 class WorkerUnreponsiveError extends Error {
   constructor(e) {
     super("worker is unresponsive");
-    c(this, "name", this.constructor.name);
-    c(this, "worker");
+    a(this, "name", this.constructor.name);
+    a(this, "worker");
     this.worker = e;
   }
 }
 class WorkerScriptError extends Error {
   constructor(e, s) {
     super(`script error caused by worker (${s.name})`);
-    c(this, "name", this.constructor.name);
-    c(this, "worker");
+    a(this, "name", this.constructor.name);
+    a(this, "worker");
     this.worker = e, this.cause = s;
   }
 }
 class WorkerDeadState extends Error {
   constructor(e, s) {
     super(`worker is in dead state (${s})`);
-    c(this, "name", this.constructor.name);
-    c(this, "worker");
+    a(this, "name", this.constructor.name);
+    a(this, "worker");
     this.worker = e;
   }
 }
 class JobNotFound extends Error {
   constructor(e, s) {
     super("job not found in worker");
-    c(this, "name", this.constructor.name);
-    c(this, "worker");
-    c(this, "job");
+    a(this, "name", this.constructor.name);
+    a(this, "worker");
+    a(this, "job");
     this.worker = e, this.job = s;
   }
 }
 class JobDoneEvent extends Event {
   constructor({ job: e, result: s }, n) {
     super("job-done", n);
-    c(this, "job");
-    c(this, "result");
+    a(this, "job");
+    a(this, "result");
     this.job = e, this.result = s;
   }
 }
@@ -154,15 +154,15 @@ function workerLoop() {
       }
   });
 }
-var h, f, d, u;
-const w = class extends EventTarget {
+var h, p, l, c;
+const f = class extends EventTarget {
   constructor({ url: e } = {}) {
     super();
-    p(this, h, []);
-    p(this, f, null);
-    p(this, d, void 0);
-    p(this, u, "idling");
-    l(this, d, new Worker(e ?? w.scriptUrl)), this.work();
+    g(this, h, []);
+    g(this, p, null);
+    g(this, l, void 0);
+    g(this, c, "idling");
+    u(this, l, new Worker(e ?? f.scriptUrl)), this.work();
   }
   static createJob(e, s) {
     return {
@@ -171,20 +171,20 @@ const w = class extends EventTarget {
     };
   }
   get worker() {
-    return i(this, d);
+    return i(this, l);
   }
   set worker(e) {
     this.reinit(e);
   }
   get state() {
-    return i(this, u);
+    return i(this, c);
   }
   work() {
-    if (i(this, u) == "idling" && i(this, h).length > 0) {
-      l(this, u, "working");
-      const e = l(this, f, i(this, h).pop());
+    if (i(this, c) == "idling" && i(this, h).length > 0) {
+      u(this, c, "working");
+      const e = u(this, p, i(this, h).pop());
       this.execute(e).then((s) => {
-        l(this, u, "idling"), l(this, f, null);
+        u(this, c, "idling"), u(this, p, null);
         const n = new JobDoneEvent({ job: e, result: s });
         this.dispatchEvent(n), this.work();
       });
@@ -194,28 +194,28 @@ const w = class extends EventTarget {
     i(this, h).length = 0;
   }
   reinit(e) {
-    e ?? (e = new Worker(w.scriptUrl)), this.terminate(), l(this, u, "idling"), l(this, d, e), this.work();
+    e ?? (e = new Worker(f.scriptUrl)), this.terminate(), u(this, c, "idling"), u(this, l, e), this.work();
   }
   terminate() {
-    i(this, d).terminate();
+    i(this, l).terminate();
   }
   async restart(e) {
-    e ?? (e = new Worker(w.scriptUrl)), await this.shutdown(), l(this, u, "idling"), l(this, d, e), this.work();
+    e ?? (e = new Worker(f.scriptUrl)), await this.shutdown(), u(this, c, "idling"), u(this, l, e), this.work();
   }
   async shutdown() {
-    return i(this, d).postMessage({
+    return i(this, l).postMessage({
       type: "shutdown"
-    }), this.awaitMessage({ type: "status", test: (e) => e.status == "shutdown" }).then((e) => (l(this, u, "shutdown"), e));
+    }), this.awaitMessage({ type: "status", test: (e) => e.status == "shutdown" }).then((e) => (u(this, c, "shutdown"), e));
   }
   async suspend() {
-    i(this, d).postMessage({
+    i(this, l).postMessage({
       type: "suspend"
-    }), l(this, u, "suspended");
+    }), u(this, c, "suspended");
   }
   async resume() {
-    i(this, d).postMessage({
+    i(this, l).postMessage({
       type: "resume"
-    }), l(this, u, "idling"), this.work();
+    }), u(this, c, "idling"), this.work();
   }
   async execute(e) {
     const s = {
@@ -223,7 +223,7 @@ const w = class extends EventTarget {
       functionCode: e.callback.toString(),
       args: e.args
     };
-    i(this, d).postMessage(s);
+    i(this, l).postMessage(s);
     const n = await this.awaitMessage({ type: "execution_result" });
     if (n.success)
       return n.returnValue;
@@ -234,10 +234,10 @@ const w = class extends EventTarget {
     return this.awaitJobDone(n);
   }
   queue(e, s) {
-    if (!(i(this, u) == "idling" || i(this, u) == "working"))
-      throw new WorkerDeadState(this, i(this, u));
+    if (!(i(this, c) == "idling" || i(this, c) == "working"))
+      throw new WorkerDeadState(this, i(this, c));
     let n;
-    return typeof e == "function" ? n = w.createJob(e, s) : n = e, i(this, h).push(n), this.work(), n;
+    return typeof e == "function" ? n = f.createJob(e, s) : n = e, i(this, h).push(n), this.work(), n;
   }
   remove(e) {
     const s = i(this, h).indexOf(e);
@@ -245,17 +245,17 @@ const w = class extends EventTarget {
   }
   awaitMessage({ type: e, test: s, timeout: n = 5e4 } = {}) {
     return new Promise((o) => {
-      let a;
-      i(this, d).addEventListener("message", (g) => {
-        const m = g.data;
-        e && m.type != e || s && !s(m) || (a && clearTimeout(a), o(m));
-      }), typeof n == "number" && (a = setTimeout(() => {
+      let d;
+      i(this, l).addEventListener("message", (m) => {
+        const w = m.data;
+        e && w.type != e || s && !s(w) || (d && clearTimeout(d), o(w));
+      }), typeof n == "number" && (d = setTimeout(() => {
         throw new WorkerUnreponsiveError(this);
       }, n));
     });
   }
   awaitJobDone(e) {
-    if (!i(this, h).includes(e) && i(this, f) != e)
+    if (!i(this, h).includes(e) && i(this, p) != e)
       throw new JobNotFound(this, e);
     return new Promise((s) => {
       this.addEventListener("job-done", (n) => {
@@ -265,11 +265,11 @@ const w = class extends EventTarget {
     });
   }
 };
-let WorkerJQ = w;
-h = new WeakMap(), f = new WeakMap(), d = new WeakMap(), u = new WeakMap(), c(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
+let WorkerJQ = f;
+h = new WeakMap(), p = new WeakMap(), l = new WeakMap(), c = new WeakMap(), a(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
 function observeMutation({ target: t, abortSignal: r, once: e, ...s }, n) {
-  const o = new MutationObserver((a) => {
-    e && o.disconnect(), n({ records: a, observer: o });
+  const o = new MutationObserver((d) => {
+    e && o.disconnect(), n({ records: d, observer: o });
   });
   return o.observe(t, s), r == null || r.addEventListener("abort", () => {
     o.disconnect();
@@ -280,8 +280,8 @@ function observeMutationOnce(t, r) {
 }
 function observeMutationAsync({ target: t, abortSignal: r, ...e }, s) {
   return new Promise((n) => {
-    const o = new MutationObserver((a) => {
-      o.disconnect(), n({ records: a, observer: o });
+    const o = new MutationObserver((d) => {
+      o.disconnect(), n({ records: d, observer: o });
     });
     o.observe(t, e), r == null || r.addEventListener("abort", () => {
       o.disconnect();
@@ -292,47 +292,62 @@ const makeMutationObserver = observeMutation;
 class WaitForElementTimeoutError extends Error {
   constructor(e) {
     super(`wait for element timeout for ${e}ms`);
-    c(this, "name", this.constructor.name);
+    a(this, "name", this.constructor.name);
   }
 }
 class WaitForElementMaxTriesError extends Error {
   constructor(e) {
     super(`wait for element out of tries (max tries: ${e})`);
-    c(this, "name", this.constructor.name);
+    a(this, "name", this.constructor.name);
   }
 }
 class WaitForElementMissingOptionError extends Error {
   constructor() {
     super(...arguments);
-    c(this, "name", this.constructor.name);
+    a(this, "name", this.constructor.name);
   }
 }
+async function awaitDomContentLoaded() {
+  return new Promise((t) => {
+    if (document.readyState != "loading")
+      return t();
+    document.addEventListener("DOMContentLoaded", () => t());
+  });
+}
 async function executeQuery(t) {
-  var k;
+  var x;
   let r;
-  const e = t.parent ?? document.body, s = t.querySelector ?? document.querySelector, n = t.maxTries ?? 1 / 0, o = t.timeout ?? 1e4;
-  if ("id" in t)
+  const e = t.parent ?? document.body, s = t.querySelector ?? ((k, E) => k.querySelector(E)), n = t.maxTries ?? 1 / 0, o = t.timeout ?? 1e4;
+  if ((t.ensureDomContentLoaded ?? !0) && await awaitDomContentLoaded(), "id" in t)
     r = `#${t.id}`;
   else if ("selector" in t)
     r = t.selector;
   else
     throw new WaitForElementMissingOptionError('missing options "id" or "selector"');
-  let a = s(r);
-  if (a)
-    return a;
-  let g = 0;
-  const m = new AbortController(), y = m.signal;
-  return (k = t.abortSignal) == null || k.addEventListener("abort", () => m.abort()), new Promise((v, b) => {
-    const E = observeMutation({ target: e, abortSignal: y, childList: !0, subtree: !0, ...t.observerOptions }, () => {
-      a = s(r), a != null ? (v(a), E.disconnect()) : g > n && (E.disconnect(), b(new WaitForElementMaxTriesError(n))), g++;
+  let m = s(e, r);
+  if (m)
+    return m;
+  let w = 0;
+  const y = new AbortController(), v = y.signal;
+  return (x = t.abortSignal) == null || x.addEventListener("abort", () => y.abort()), new Promise((k, E) => {
+    const b = observeMutation({ target: e, abortSignal: v, childList: !0, subtree: !0, ...t.observerOptions }, () => {
+      m = s(e, r), m != null ? (k(m), b.disconnect()) : w > n && (b.disconnect(), E(new WaitForElementMaxTriesError(n))), w++;
     });
     o != !1 && o != 1 / 0 && setTimeout(() => {
-      E.disconnect(), b(new WaitForElementTimeoutError(o));
+      b.disconnect(), E(new WaitForElementTimeoutError(o));
     }, o);
   });
 }
-function waitForElement(t, r) {
-  return executeQuery({ selector: t, ...r });
+function waitForElement(t, r, e) {
+  let s;
+  return r instanceof Node && "children" in r ? s = {
+    selector: t,
+    parent: r,
+    ...e
+  } : s = {
+    selector: t,
+    ...r
+  }, executeQuery({ selector: t, ...s });
 }
 function waitForElementAll(t, r) {
   return executeQuery({ selector: t, ...r }).then((e) => Array.from(e));
@@ -354,6 +369,7 @@ export {
   WorkerJQ,
   WorkerScriptError,
   WorkerUnreponsiveError,
+  awaitDomContentLoaded,
   escapeHTML,
   escapeRegExp,
   executeQuery,
