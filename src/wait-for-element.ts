@@ -1,28 +1,115 @@
 
-import { WaitForElementMissingOptionError, WaitForElementMaxTriesError, WaitForElementTimeoutError } from "./wait-for-element-errors";
+import {
+    WaitForElementMissingOptionError,
+    WaitForElementMaxTriesError,
+    WaitForElementTimeoutError
+} from "./wait-for-element-errors";
+
 import { observeMutation } from "./mutation-observer";
 
-export type QueryOptions<QueryFnResult, QueryFn extends (selector: string) => QueryFnResult | null = (selector: string) => QueryFnResult | null> =
-    ({ id: string } | { selector: string })
+export type QueryFnDefault<QueryFnResult> = (parent: ParentNode, selector: string) => QueryFnResult | null;
+
+export type QueryOptions<QueryFnResult, QueryFn extends QueryFnDefault<QueryFnResult> = QueryFnDefault<QueryFnResult>> =
+    ({
+        /** Set to ID selector that the operation will query select.
+         * 
+         * If `id` and/or `selector` is not set, then it will throw {@link WaitForElementMissingOptionError}.
+         * 
+         * @see {@link document.getElementById}
+         */
+        id: string;
+    } | {
+        /**
+         * Set to valid selector that the operation will query select.
+         * 
+         * If `id` and/or `selector` is not set, then it will throw {@link WaitForElementMissingOptionError}.
+         * 
+         * @see {@link document.querySelector} 
+         */
+        selector: string;
+    })
     & {
+        /**
+         * Set to parent node that the operation will be query select from.
+         * 
+         * This will also set mutation observer's target.
+         * 
+         * By default, it will set to {@link document.documentElement}.
+         */
         parent?: ParentNode;
+        /**
+         * Set to element or an operation that will be used for query selecting.
+         * 
+         * Can be set to {@link document.querySelector} or {@link document.querySelectorAll}.
+         * 
+         * By default, it will set to {@link document.querySelector}.
+         * 
+         * @see {@link document.querySelector}
+         * @see {@link QueryOptions.parent}
+         */
         querySelector?: QueryFn;
+        /**
+         * Set to abort signal from {@link AbortController} that will be used to abort the operation.
+         * 
+         * @see {@link AbortController}
+         */
         abortSignal?: AbortSignal;
+        /**
+         * Set to milliseconds that will be used to timeout the operation.
+         * 
+         * If operation has timeout, then it will throw {@link WaitForElementTimeoutError}.
+         * 
+         * Set to `false` to disable timeout feature.
+         * 
+         * By default, it will set to `10_000` milliseconds.
+         * 
+         * @see {@link setTimeout}
+         */
         timeout?: number | false;
+        /**
+         * Set to number which will determine how much the operation can be restarted.
+         * 
+         * If operation has reached max tries, then it will throw {@link WaitForElementMaxTriesError}.
+         * 
+         * By default, it will set to `Infinity`.
+         */
         maxTries?: number;
+        /**
+         * Set to true if the operation will wait for `DOMContentLoaded` event.
+         * 
+         * By default, it will set to `true`.
+         */
         ensureDomContentLoaded?: boolean;
+        /**
+         * Set to mutation observer's options for the operation's mutation observer options.
+         * 
+         * By default, the operation's will enable `childList` and `subtree` mutation observer option.
+         * 
+         * @see {@link MutationObserverInit}
+         * @see {@link QueryOptions.parent}
+         */
         observerOptions?: MutationObserverInit;
     };
 
+export async function awaitDomContentLoaded(): Promise<void> {
+    return new Promise(resolve => {
+        if (document.readyState != "loading") return resolve();
+        document.addEventListener("DOMContentLoaded", () => resolve());
+    });
+}
+
 export async function executeQuery
-    <QueryFnResult, QueryFn extends (selector: string) => QueryFnResult | null = (selector: string) => QueryFnResult | null>
+    <QueryFnResult, QueryFn extends QueryFnDefault<QueryFnResult> = QueryFnDefault<QueryFnResult>>
     (options: QueryOptions<QueryFnResult, QueryFn>): Promise<QueryFnResult>
 {
     let selector: string;
     const parent = options.parent ?? document.body;
-    const querySelector: QueryFn = options.querySelector ?? document.querySelector as QueryFn;
+    const querySelector: QueryFn = options.querySelector ?? ((parent, selector) => parent.querySelector(selector)) as QueryFn;
     const maxTries = options.maxTries ?? Infinity;
     const timeout = options.timeout ?? 10_000;
+    const ensureDomContentLoaded = options.ensureDomContentLoaded ?? true;
+
+    if (ensureDomContentLoaded) await awaitDomContentLoaded();
 
     if ("id" in options) {
         selector = `#${options.id}`;
@@ -34,7 +121,7 @@ export async function executeQuery
         throw new WaitForElementMissingOptionError(`missing options "id" or "selector"`);
     }
 
-    let result: QueryFnResult | null = querySelector(selector);
+    let result: QueryFnResult | null = querySelector(parent, selector);
 
     if (result) return result;
 
@@ -47,7 +134,7 @@ export async function executeQuery
 
     return new Promise((resolve, reject) => {
         const mutation = observeMutation({ target: parent, abortSignal, childList: true, subtree: true, ...options.observerOptions }, () => {
-            result = querySelector(selector);
+            result = querySelector(parent, selector);
             if (result != null) {
                 resolve(result);
                 mutation.disconnect();
@@ -68,22 +155,46 @@ export async function executeQuery
     });
 }
 
-export function waitForElement<Elem extends Element>(selector: string, options: QueryOptions<Elem>): Promise<Elem> {
+export function waitForElement<Elem extends Element>(selector: string, options?: QueryOptions<Elem>): Promise<Elem>;
+export function waitForElement<Elem extends Element>(selector: string, parent: ParentNode, options?: QueryOptions<Elem>): Promise<Elem>;
+export function waitForElement(selector: string, arg1?: any, arg2?: any): any
+{
+    let options: QueryOptions<Element>;
+
+    if (arg1 instanceof Node && "children" in arg1) {
+        // arg1 is ParentNode
+        options = {
+            selector,
+            parent: arg1 as ParentNode,
+            ...arg2
+        };
+    }
+    else {
+        // arg1 is QueryOptions
+        options = {
+            selector,
+            ...arg1
+        };
+    }
+
     return executeQuery({ selector, ...options });
 }
 
-export function waitForElementAll(selector: string, options: QueryOptions<NodeListOf<Element>>): Promise<Element[]> {
+export function waitForElementAll<Elem extends Element>(selector: string, options?: QueryOptions<NodeListOf<Elem>>): Promise<Elem[]>;
+export function waitForElementAll<Elems extends Element[]>(selector: string, options?: QueryOptions<NodeListOf<Element>>): Promise<Elems>;
+export function waitForElementAll(selector: string, options?: QueryOptions<NodeListOf<Element>>): Promise<Element[]>
+{
     return executeQuery<NodeListOf<Element>>({ selector, ...options }).then(i => Array.from(i));
 }
 
-export function waitForElementParent<Elem extends Element>(parent: ParentNode, selector: string, options: QueryOptions<Elem>): Promise<Elem> {
+export function waitForElementParent<Elem extends Element>(parent: ParentNode, selector: string, options?: QueryOptions<Elem>): Promise<Elem> {
     return executeQuery({ selector, parent, ...options });
 }
 
-export function waitForElementId<Elem extends Element>(id: string, options: QueryOptions<Elem>): Promise<Elem> {
+export function waitForElementId<Elem extends Element>(id: string, options?: QueryOptions<Elem>): Promise<Elem> {
     return executeQuery<Elem>({ id, ...options });
 }
 
-export function waitForElementInf<Elem extends Element>(selector: string, options: QueryOptions<Elem>): Promise<Elem> {
+export function waitForElementInf<Elem extends Element>(selector: string, options?: QueryOptions<Elem>): Promise<Elem> {
     return executeQuery({ selector, timeout: Infinity, ...options });
 }
