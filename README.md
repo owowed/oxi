@@ -37,7 +37,12 @@ For upcoming release tag of this package, see the [`package`](https://github.com
 
 ## Contributing
 
-If you have any ideas or suggestions for improvements, you may fork this repository and submit a pull request, but before doing that, please read our [Contributor Guidelines & Documentation](./docs/CONTRIBUTING.md).
+If you have found a bug or a mistake on our project, please report it by submitting an [issue](https://github.com/owowed/oxi/issues)!
+
+If you have any ideas or suggestions for improvements, feel free to submit an [issue](https://github.com/owowed/oxi/issues)!
+
+
+If you want to contribute directly to our project, feel free fork this repository and submit a pull request! But before doing that, please read our [Contributor Guidelines & Documentation](./docs/CONTRIBUTING.md).
 
 For commit message, we follow very similiar style to [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format).
 
