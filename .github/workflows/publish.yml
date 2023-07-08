@@ -8,6 +8,8 @@ on:
 jobs:
   update-package:
     uses: ./.github/workflows/update-package.yml
+    permissions:
+      contents: write
     with:
       tag_name: ${{ github.ref_name }}
 
