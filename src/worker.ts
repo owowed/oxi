@@ -91,12 +91,10 @@ function workerLoop() {
 
         switch (data.type) {
         case "status":
-            const respond: ChildMessageStatus = {
+            self.postMessage({
                 type: "status",
                 status: state
-            };
-
-            self.postMessage(respond);
+            } satisfies ChildMessageStatus);
             break;
         case "resume":
             state = "idling";
@@ -122,7 +120,12 @@ function workerLoop() {
             break;
         case "shutdown":
             state = "shutdown";
-            self.postMessage({ type: "status", status: "shutdown" } satisfies ChildMessageStatus);
+            
+            self.postMessage({
+                type: "status",
+                status: "shutdown"
+            } satisfies ChildMessageStatus);
+
             self.close();
             break;
         }
@@ -136,6 +139,13 @@ function workerLoop() {
  */
 export class WorkerJQ extends EventTarget {
     static readonly scriptUrl = `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`;
+
+    static createJob<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Readonly<Job<Result, Args>> {
+        return {
+            callback,
+            args: (args ?? []) as Args
+        };
+    }
 
     #jobQueue: Job<any>[] = [];
     #currentlyExecutingJob: Job<any> | null = null;
@@ -253,14 +263,20 @@ export class WorkerJQ extends EventTarget {
         return this.awaitJobDone(job);
     }
 
-    queue<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Readonly<Job<Result, Args>> {
+    queue<TJob extends Job<any>>(job: TJob): Readonly<TJob>;
+    queue<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Readonly<Job<Result, Args>>;
+    queue(arg0: any, arg1?: any)
+    {
         if (!(this.#state == "idling" || this.#state == "working")) throw new WorkerDeadState(this, this.#state);
 
-        const job: Job<Result, Args> = {
-            callback,
-            // @ts-ignore
-            args: args ?? [] as any[],
-        };
+        let job: Job<any>;
+        
+        if (typeof arg0 == "function") {
+            job = WorkerJQ.createJob(arg0, arg1);
+        }
+        else {
+            job = arg0;
+        }
 
         this.#jobQueue.push(job);
 
