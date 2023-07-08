@@ -12,7 +12,7 @@
     - New features that are backward compatible must be labeled `minor`.
     - Bug fixes that are backward compatible must be labeled `patch`.
 
-- Label `feature`, `docs`, `refactor`, and `bugfix` are only used for Pull Requests, while `feature-request` and `bug` are only used for Issues.
+- Label `feature`, `docs`, `ci`, `refactor`, and `bugfix` are only used for Pull Requests, while `feature-request` and `bug` are only used for Issues.
     - Please label them accordingly. For example: pull request featuring `feat` commit, add the `feature` label.
 
 - Labeling process are mostly automated by the bot, but please re-check them to ensure the labels are correct.
