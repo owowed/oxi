@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build.yml
+    with:
+      tag_name: ${{ github.ref_name }}
 
   push-dist:
     needs: build
@@ -21,7 +23,7 @@ jobs:
       - name: Download dist files
         uses: actions/download-artifact@v3
         with:
-          name: oxi-dist
+          name: oxi-${{ github.ref_name }}-dist
           path: ./dist
 
       - name: Setup Git
@@ -48,13 +50,13 @@ jobs:
       - name: Download dist files
         uses: actions/download-artifact@v3
         with:
-          name: oxi-dist
+          name: oxi-${{ github.ref_name }}-dist
           path: ./dist
       
       - name: Create zip archive of dist files
         id: archives
         run: |
-          zip_archive="oxi-dist-$GITHUB_REF_NAME.zip"
+          zip_archive="oxi-${{ github.ref_name }}-dist.zip"
 
           zip -r9 "$zip_archive" dist/*
 
