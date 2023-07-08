@@ -1,0 +1,33 @@
+name: Release Edited Action
+
+on:
+  release:
+    types: edited
+  workflow_dispatch: {}
+
+jobs:
+  release-info:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag_name: ${{ steps.release-info.outputs.tag_name }}
+    steps:
+      - name: Get latest draft release info
+        id: release-info
+        uses: cardinalby/git-get-release-action@1.2.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          latest: true
+          draft: true
+
+  update-package:
+    uses: ./.github/workflows/update-package.yml
+    needs: release-info
+    permissions:
+      contents: write
+    with:
+      tag_name: ${{ needs.release-info.outputs.tag_name }}
+
+  
