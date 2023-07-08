@@ -21,65 +21,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build:
+  update-package:
+    uses: ./.github/workflows/update-package.yml
     needs: release-draft
-    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: write
     with:
       tag_name: ${{ needs.release-draft.outputs.tag_name }}
 
-  update-package:
-    needs:
-      - release-draft # getting latest release info
-      - build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Git
-        uses: ./.github/actions/setup-git
-
-      - name: Create package branch if it doesn't exist
-        run: |
-          if ! git ls-remote | grep 'refs/heads/package$'; then
-            git switch -c package
-            git push origin package;
-          else
-            echo package branch already exist;
-          fi
-
-      - name: Checkout to package
-        uses: actions/checkout@v3
-        with:
-          ref: package
-          fetch-depth: 0
-
-      - name: Merge master to package
-        run: |
-          git merge origin/master --no-commit -X theirs
-          git commit -m "build: merge master to package (auto)" &&
-          git push -f origin package || true
-
-      - name: NPM bump version
-        continue-on-error: true
-        run: |
-          npm version ${{ needs.release-draft.outputs.tag_name }} --no-git-tag-version
-
-      - name: Download dist artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: oxi-${{ needs.release-draft.outputs.tag_name }}-dist
-          path: ./dist
-        
-      - name: Push dist files into package branch
-        run: |
-          # Commit dist folder from the dist artifact
-          git add -A
-          git commit -m "build: update ${{ needs.release-draft.outputs.tag_name }} files (auto)" || true
-
-          # Push all changes
-          git push origin package
+  
