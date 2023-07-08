@@ -30,7 +30,7 @@ version-resolver:
       - 'patch'
   default: patch
 template: |
-  Here is the changelog for v$RESOLVED_VERSION:
+  Here are the changes made for v$RESOLVED_VERSION:
 
   $CHANGES
 autolabeler:
