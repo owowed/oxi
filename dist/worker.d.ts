@@ -17,6 +17,7 @@ export declare class JobDoneEvent extends Event {
 export declare class WorkerJQ extends EventTarget {
     #private;
     static readonly scriptUrl: string;
+    static createJob<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Readonly<Job<Result, Args>>;
     constructor({ url }?: Partial<WorkerJQOptions>);
     get worker(): Worker;
     set worker(worker: Worker);
@@ -31,6 +32,7 @@ export declare class WorkerJQ extends EventTarget {
     resume(): Promise<void>;
     execute<Result>(job: Job<Result>): Promise<Result>;
     run<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Promise<Result>;
+    queue<TJob extends Job<any>>(job: TJob): Readonly<TJob>;
     queue<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Readonly<Job<Result, Args>>;
     remove(job: Job<any>): boolean;
     awaitMessage<Type extends ChildMessage["type"]>(options: {

@@ -125,11 +125,10 @@ function workerLoop() {
     const r = t.data;
     switch (r.type) {
       case "status":
-        const e = {
+        self.postMessage({
           type: "status",
           status: state
-        };
-        self.postMessage(e);
+        });
         break;
       case "resume":
         state = "idling";
@@ -147,20 +146,29 @@ function workerLoop() {
           state = "suspended";
           break;
         case "shutdown":
-          state = "shutdown", self.postMessage({ type: "status", status: "shutdown" }), self.close();
+          state = "shutdown", self.postMessage({
+            type: "status",
+            status: "shutdown"
+          }), self.close();
           break;
       }
   });
 }
-var h, w, d, u;
-const f = class extends EventTarget {
+var h, f, d, u;
+const w = class extends EventTarget {
   constructor({ url: e } = {}) {
     super();
     p(this, h, []);
-    p(this, w, null);
+    p(this, f, null);
     p(this, d, void 0);
     p(this, u, "idling");
-    l(this, d, new Worker(e ?? f.scriptUrl)), this.work();
+    l(this, d, new Worker(e ?? w.scriptUrl)), this.work();
+  }
+  static createJob(e, s) {
+    return {
+      callback: e,
+      args: s ?? []
+    };
   }
   get worker() {
     return i(this, d);
@@ -174,9 +182,9 @@ const f = class extends EventTarget {
   work() {
     if (i(this, u) == "idling" && i(this, h).length > 0) {
       l(this, u, "working");
-      const e = l(this, w, i(this, h).pop());
+      const e = l(this, f, i(this, h).pop());
       this.execute(e).then((s) => {
-        l(this, u, "idling"), l(this, w, null);
+        l(this, u, "idling"), l(this, f, null);
         const n = new JobDoneEvent({ job: e, result: s });
         this.dispatchEvent(n), this.work();
       });
@@ -186,13 +194,13 @@ const f = class extends EventTarget {
     i(this, h).length = 0;
   }
   reinit(e) {
-    e ?? (e = new Worker(f.scriptUrl)), this.terminate(), l(this, u, "idling"), l(this, d, e), this.work();
+    e ?? (e = new Worker(w.scriptUrl)), this.terminate(), l(this, u, "idling"), l(this, d, e), this.work();
   }
   terminate() {
     i(this, d).terminate();
   }
   async restart(e) {
-    e ?? (e = new Worker(f.scriptUrl)), await this.shutdown(), l(this, u, "idling"), l(this, d, e), this.work();
+    e ?? (e = new Worker(w.scriptUrl)), await this.shutdown(), l(this, u, "idling"), l(this, d, e), this.work();
   }
   async shutdown() {
     return i(this, d).postMessage({
@@ -228,12 +236,8 @@ const f = class extends EventTarget {
   queue(e, s) {
     if (!(i(this, u) == "idling" || i(this, u) == "working"))
       throw new WorkerDeadState(this, i(this, u));
-    const n = {
-      callback: e,
-      // @ts-ignore
-      args: s ?? []
-    };
-    return i(this, h).push(n), this.work(), n;
+    let n;
+    return typeof e == "function" ? n = w.createJob(e, s) : n = e, i(this, h).push(n), this.work(), n;
   }
   remove(e) {
     const s = i(this, h).indexOf(e);
@@ -251,7 +255,7 @@ const f = class extends EventTarget {
     });
   }
   awaitJobDone(e) {
-    if (!i(this, h).includes(e) && i(this, w) != e)
+    if (!i(this, h).includes(e) && i(this, f) != e)
       throw new JobNotFound(this, e);
     return new Promise((s) => {
       this.addEventListener("job-done", (n) => {
@@ -261,8 +265,8 @@ const f = class extends EventTarget {
     });
   }
 };
-let WorkerJQ = f;
-h = new WeakMap(), w = new WeakMap(), d = new WeakMap(), u = new WeakMap(), c(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
+let WorkerJQ = w;
+h = new WeakMap(), f = new WeakMap(), d = new WeakMap(), u = new WeakMap(), c(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
 function observeMutation({ target: t, abortSignal: r, once: e, ...s }, n) {
   const o = new MutationObserver((a) => {
     e && o.disconnect(), n({ records: a, observer: o });
