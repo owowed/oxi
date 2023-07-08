@@ -10,7 +10,7 @@
 
 ## Labeling
 
-- Label `major`, `minor`, and `patch` accordingly to [Semantic Versioning](https://semver.org/).
+- Label `major`, `minor`, and `patch` accordingly to [Semantic Versioning](https://semver.org/), with few additional rules:
     - Any breaking/backward incompatible changes or removal of features must be labeled `major`.
     - New features that are backward compatible must be labeled `minor`.
         - Except for new TypeScript type definitions or JSDoc comments, that do not change how the runtime implementation work, must be labeled `patch`. 
