@@ -12,14 +12,20 @@ jobs:
     permissions:
       contents: write
       pull-requests: read
+    outputs:
+      tag_name: ${{ steps.release-draft.outputs.tag_name }}
     steps:
       - name: Draft release
+        id: release-draft
         uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
+    needs: release-draft
     uses: ./.github/workflows/build.yml
+    with:
+      tag_name: ${{ needs.release-draft.outputs.tag_name }}
 
   update-package:
     needs:
@@ -52,13 +58,6 @@ jobs:
           ref: package
           fetch-depth: 0
 
-      - name: Get latest draft release information
-        id: release-info
-        uses: cardinalby/git-get-release-action@v1
-        with:
-          latest: true
-          draft: true
-
       - name: Merge master to package
         run: |
           git merge origin/master --no-commit -X theirs
@@ -68,19 +67,19 @@ jobs:
       - name: NPM bump version
         continue-on-error: true
         run: |
-          npm version ${{ steps.release-info.outputs.tag_name }} --no-git-tag-version
+          npm version ${{ needs.release-draft.outputs.tag_name }} --no-git-tag-version
 
       - name: Download dist artifact
         uses: actions/download-artifact@v3
         with:
-          name: oxi-dist
+          name: oxi-${{ needs.release-draft.outputs.tag_name }}-dist
           path: ./dist
         
       - name: Push dist files into package branch
         run: |
           # Commit dist folder from the dist artifact
           git add -A
-          git commit -m "build: update ${{ steps.release-info.outputs.tag_name }} files (auto)" || true
+          git commit -m "build: update ${{ needs.release-draft.outputs.tag_name }} files (auto)" || true
 
           # Push all changes
           git push origin package
