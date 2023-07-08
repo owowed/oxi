@@ -17,6 +17,7 @@
 
 - Label `feature`, `docs`, `ci`, `refactor`, and `bugfix` are only used for Pull Requests, while `feature-request` and `bug` are only used for Issues.
     - Please label them accordingly. For example: pull request featuring `feat` commit, add the `feature` label.
+    - Do not label them with each other. Each pull request or issue must only have one of these labels.
 
 - Labeling process are mostly automated by the bot, but please re-check them to ensure the labels are correct.
 
