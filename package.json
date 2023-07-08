@@ -33,9 +33,9 @@
   "engines": {
     "node": "^16.14.0 || >=18.10.0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.3.0",
+    "nodemon": "^2.0.22",
     "prettier": "^2.8.8",
     "tslib": "^2.5.3",
     "typescript": "^5.1.3",
