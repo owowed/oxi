@@ -2,8 +2,11 @@
 
 ## General Rules
 
-- Fork and create pull request before committing into the `master` branch.
-- Pull request and issue must be written in English.
+- Create issue for reporting a bug or suggestion for new/or an existing feature.
+- Create pull request to contribute features or enhancements to the project.
+    - Pull request must be reviewed and approved first before being committed into the `master` branch.
+- Pull request and issue must be written in English to ensure clear understanding and communication for all contributors.
+- Pull request should be dedicated to a single topic, addressing one specific topic such as a feature, code refactoring, or bug fix, with separate requests for each distinct category.
 
 ## Labeling
 
