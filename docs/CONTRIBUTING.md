@@ -1,22 +1,35 @@
-# Contributing Guidelines & Documentation
+# Contributor Guidelines & Documentation
 
 ## General Rules
 
 - Fork and create pull request before committing into the `master` branch.
+- Pull request and issue must be written in English.
+
+## Labeling
+
+- Label `major`, `minor`, and `patch` accordingly to [Semantic Versioning](https://semver.org/).
+    - Any breaking/backward incompatible changes or removal of features must be labeled as `major`.
+    - New features that are backward compatible must be labeled as `minor`.
+    - Bug fixes that are backward compatible must be labeled as `patch`.
+
+- Label `feature`, `documentation`, and `bugfix` are only used for Pull Requests, while `feature-request` and `bug` are only used for Issues.
+    - Please label them accordingly. For example: pull request featuring `feat` commit, add the `feature` label.
+
+- Labeling process are mostly automated by the bot, but please re-check them to ensure the labels are correct.
 
 ## Branch
 
 - `master` - the main branch for the repository.
-- `package` - contains the lastest commits from `master` and `dist` files.
+- `package` - contains the lastest commits from `master` and build files.
     - Auto-generated. Do not make commit or change into this branch.
 - `dist` - contains the latest release `dist` files on the top level.
     - Auto-generated. Do not make commit or change into this branch.
 
 ## Commit Message Format
 
-We follow strictly to [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/) for our commit message format.
+We strictly follow [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/) for our commit message format.
 
-We also recommend [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) and its other conventions for some area.
+We also recommend [Angular's Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) and other conventions in some area.
 
 ## Release
 
@@ -24,4 +37,6 @@ We also recommend [Angular's Commit Message Format](https://github.com/angular/a
 
 - Always select `package` branch target for the release tag. The `package` branch contains the latest commits and files from `master` and the latest `dist` files automatically generated, which `master` doesn't have.
 
-- Pull request merge commits are automatically tracked by release-drafter and written into the latest release draft.
+- Pull request are automatically tracked by release-drafter and written into the latest release draft.
+
+- When correcting or changing a draft release versioning (e.g. v0.2.0 -> v0.1.8), please run the "Release Edited Action" workflow from the "Actions" tab to ensure the correct version of the `package` branch.
