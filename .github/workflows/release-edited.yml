@@ -1,4 +1,4 @@
-name: Release Edited Action
+name: Release Edited
 
 on:
   release:
