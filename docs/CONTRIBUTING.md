@@ -28,7 +28,7 @@
 - `dist` - contains the latest release `dist` files on the top level.
     - Auto-generated. Do not make commit or change into this branch.
 
-## Commit Message Format
+## Commit Message Convention
 
 We strictly follow [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/) for our commit message format.
 
