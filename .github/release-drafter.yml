@@ -58,7 +58,6 @@ autolabeler:
       - '/docs\/.+/'
 
   - label: ci
-    title: '/ci/i'
     files:
       - '.github/**/*.yml'
     branch:
