@@ -315,7 +315,7 @@ async function awaitDomContentLoaded() {
   });
 }
 function isNotEmpty(t) {
-  return t instanceof NodeList ? !0 : t != null;
+  return t instanceof NodeList && t.length > 0 ? !0 : t != null;
 }
 async function executeQuery(t) {
   var x;
