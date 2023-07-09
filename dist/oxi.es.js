@@ -222,14 +222,14 @@ const p = class extends EventTarget {
     }), this.awaitMessage({ type: "status", test: (e) => e.status == "shutdown" }).then((e) => (u(this, c, "shutdown"), e));
   }
   async suspend() {
-    i(this, d).postMessage({
+    return i(this, d).postMessage({
       type: "suspend"
-    }), u(this, c, "suspended");
+    }), u(this, c, "suspended"), this.awaitMessage({ type: "status", test: (e) => e.status == "suspended" });
   }
   async resume() {
-    i(this, d).postMessage({
+    return i(this, d).postMessage({
       type: "resume"
-    }), u(this, c, "idling"), this.work();
+    }), this.awaitMessage({ type: "status", test: (e) => e.status == "idling" }).then((e) => (u(this, c, "idling"), this.work(), e));
   }
   async execute(e) {
     const s = {
@@ -336,7 +336,7 @@ function isNotEmpty(t) {
   return t instanceof NodeList && t.length > 0 ? !0 : t != null;
 }
 async function executeQuery(t) {
-  var y;
+  var v;
   let r;
   const e = t.parent ?? document.body, s = t.querySelector ?? ((g, b) => g.querySelector(b)), n = t.maxTries ?? 1 / 0, o = t.timeout ?? 1e4;
   if ((t.ensureDomContentLoaded ?? !0) && await awaitDomContentLoaded(), "id" in t)
@@ -349,8 +349,8 @@ async function executeQuery(t) {
   if (isNotEmpty(m))
     return m;
   let h = 0;
-  const v = new AbortController(), M = v.signal;
-  return (y = t.abortSignal) == null || y.addEventListener("abort", () => v.abort()), new Promise((g, b) => {
+  const y = new AbortController(), M = y.signal;
+  return (v = t.abortSignal) == null || v.addEventListener("abort", () => y.abort()), new Promise((g, b) => {
     const k = observeMutation({ target: e, abortSignal: M, childList: !0, subtree: !0, ...t.observerOptions }, () => {
       m = s(e, r), isNotEmpty(m) ? (g(m), k.disconnect()) : h > n && (k.disconnect(), b(new WaitForElementMaxTriesError(n))), h++;
     });

@@ -36,8 +36,8 @@ export declare class WorkerJQ extends EventTarget {
     terminate(): void;
     restart(worker?: Worker): Promise<void>;
     shutdown(): Promise<ChildMessageStatus>;
-    suspend(): Promise<void>;
-    resume(): Promise<void>;
+    suspend(): Promise<ChildMessageStatus>;
+    resume(): Promise<ChildMessageStatus>;
     execute<Result>(job: Job<Result>): Promise<Result>;
     run<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Promise<Result>;
     queue<TJob extends Job<any>>(job: TJob): Readonly<TJob>;
