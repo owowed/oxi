@@ -220,6 +220,7 @@ export class WorkerJQ extends EventTarget {
 
     terminate() {
         this.#worker.terminate();
+        this.#state = "terminated";
     }
 
     async restart(worker?: Worker) {
