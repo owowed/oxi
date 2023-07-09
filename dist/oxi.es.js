@@ -155,14 +155,14 @@ function workerLoop() {
   });
 }
 var h, p, l, c;
-const f = class extends EventTarget {
+const w = class extends EventTarget {
   constructor({ url: e } = {}) {
     super();
     g(this, h, []);
     g(this, p, null);
     g(this, l, void 0);
     g(this, c, "idling");
-    u(this, l, new Worker(e ?? f.scriptUrl)), this.work();
+    u(this, l, new Worker(e ?? w.scriptUrl)), this.work();
   }
   static createJob(e, s) {
     return {
@@ -194,13 +194,13 @@ const f = class extends EventTarget {
     i(this, h).length = 0;
   }
   reinit(e) {
-    e ?? (e = new Worker(f.scriptUrl)), this.terminate(), u(this, c, "idling"), u(this, l, e), this.work();
+    e ?? (e = new Worker(w.scriptUrl)), this.terminate(), u(this, c, "idling"), u(this, l, e), this.work();
   }
   terminate() {
     i(this, l).terminate();
   }
   async restart(e) {
-    e ?? (e = new Worker(f.scriptUrl)), await this.shutdown(), u(this, c, "idling"), u(this, l, e), this.work();
+    e ?? (e = new Worker(w.scriptUrl)), await this.shutdown(), u(this, c, "idling"), u(this, l, e), this.work();
   }
   async shutdown() {
     return i(this, l).postMessage({
@@ -237,7 +237,7 @@ const f = class extends EventTarget {
     if (!(i(this, c) == "idling" || i(this, c) == "working"))
       throw new WorkerDeadState(this, i(this, c));
     let n;
-    return typeof e == "function" ? n = f.createJob(e, s) : n = e, i(this, h).push(n), this.work(), n;
+    return typeof e == "function" ? n = w.createJob(e, s) : n = e, i(this, h).push(n), this.work(), n;
   }
   remove(e) {
     const s = i(this, h).indexOf(e);
@@ -247,8 +247,8 @@ const f = class extends EventTarget {
     return new Promise((o) => {
       let d;
       i(this, l).addEventListener("message", (m) => {
-        const w = m.data;
-        e && w.type != e || s && !s(w) || (d && clearTimeout(d), o(w));
+        const f = m.data;
+        e && f.type != e || s && !s(f) || (d && clearTimeout(d), o(f));
       }), typeof n == "number" && (d = setTimeout(() => {
         throw new WorkerUnreponsiveError(this);
       }, n));
@@ -265,7 +265,7 @@ const f = class extends EventTarget {
     });
   }
 };
-let WorkerJQ = f;
+let WorkerJQ = w;
 h = new WeakMap(), p = new WeakMap(), l = new WeakMap(), c = new WeakMap(), a(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
 function observeMutation({ target: t, abortSignal: r, once: e, ...s }, n) {
   const o = new MutationObserver((d) => {
@@ -314,6 +314,9 @@ async function awaitDomContentLoaded() {
     document.addEventListener("DOMContentLoaded", () => t());
   });
 }
+function isNotEmpty(t) {
+  return t instanceof NodeList ? !0 : t != null;
+}
 async function executeQuery(t) {
   var x;
   let r;
@@ -325,16 +328,16 @@ async function executeQuery(t) {
   else
     throw new WaitForElementMissingOptionError('missing options "id" or "selector"');
   let m = s(e, r);
-  if (m)
+  if (isNotEmpty(m))
     return m;
-  let w = 0;
-  const y = new AbortController(), v = y.signal;
-  return (x = t.abortSignal) == null || x.addEventListener("abort", () => y.abort()), new Promise((k, E) => {
-    const b = observeMutation({ target: e, abortSignal: v, childList: !0, subtree: !0, ...t.observerOptions }, () => {
-      m = s(e, r), m != null ? (k(m), b.disconnect()) : w > n && (b.disconnect(), E(new WaitForElementMaxTriesError(n))), w++;
+  let f = 0;
+  const b = new AbortController(), v = b.signal;
+  return (x = t.abortSignal) == null || x.addEventListener("abort", () => b.abort()), new Promise((k, E) => {
+    const y = observeMutation({ target: e, abortSignal: v, childList: !0, subtree: !0, ...t.observerOptions }, () => {
+      m = s(e, r), isNotEmpty(m) ? (k(m), y.disconnect()) : f > n && (y.disconnect(), E(new WaitForElementMaxTriesError(n))), f++;
     });
     o != !1 && o != 1 / 0 && setTimeout(() => {
-      b.disconnect(), E(new WaitForElementTimeoutError(o));
+      y.disconnect(), E(new WaitForElementTimeoutError(o));
     }, o);
   });
 }
