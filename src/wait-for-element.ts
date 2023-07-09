@@ -99,7 +99,7 @@ export async function awaitDomContentLoaded(): Promise<void> {
 }
 
 function isNotEmpty<T>(x: T): x is Exclude<T, null> {
-    if (x instanceof NodeList) {
+    if (x instanceof NodeList && x.length > 0) {
         return true;
     }
     else {
