@@ -45,4 +45,6 @@ We also recommend [Angular's Commit Message Format](https://github.com/angular/a
 
 - Pull request are automatically tracked by release-drafter and written into the latest release draft.
 
-- When correcting or changing a draft release versioning (e.g. v0.2.0 -> v0.1.8), please run the "Release Edited Action" workflow from the "Actions" tab to ensure the correct version of the `package` branch.
+- When correcting or changing a draft release versioning (e.g. v0.2.0 -> v0.1.8), please run the "Release Edited" workflow from the "Actions" tab to ensure the correct version of the `package` branch.
+
+- You may select any tag available in the repository for publishing NPM package.
