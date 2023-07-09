@@ -1,12 +1,20 @@
 import type { AwaitMessageInit, ChildMessage, ChildMessageStatus, Job, WorkerJQOptions } from "./worker-types";
 export * from "./worker-types";
 export * from "./worker-errors";
-export declare class JobDoneEvent extends Event {
+export declare class JobFinishedEvent extends Event {
     job: Job<any>;
     result: any;
     constructor({ job, result }: {
         job: Job<any>;
         result: any;
+    }, options?: EventInit);
+}
+export declare class JobErrorEvent extends Event {
+    job: Job<any>;
+    error: any;
+    constructor({ job, error }: {
+        job: Job<any>;
+        error: any;
     }, options?: EventInit);
 }
 /**
@@ -42,5 +50,6 @@ export declare class WorkerJQ extends EventTarget {
     }>>>): Promise<Extract<ChildMessage, {
         type: Type;
     }>>;
-    awaitJobDone<Result>(job: Job<Result>): Promise<Result>;
+    awaitJob<Result>(job: Job<Result>): Promise<Result>;
+    awaitJobDone: <Result>(job: Job<Result, any>) => Promise<Result>;
 }

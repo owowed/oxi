@@ -1,14 +1,14 @@
 var L = Object.defineProperty;
-var T = (t, r, e) => r in t ? L(t, r, { enumerable: !0, configurable: !0, writable: !0, value: e }) : t[r] = e;
-var a = (t, r, e) => (T(t, typeof r != "symbol" ? r + "" : r, e), e), M = (t, r, e) => {
+var F = (t, r, e) => r in t ? L(t, r, { enumerable: !0, configurable: !0, writable: !0, value: e }) : t[r] = e;
+var a = (t, r, e) => (F(t, typeof r != "symbol" ? r + "" : r, e), e), x = (t, r, e) => {
   if (!r.has(t))
     throw TypeError("Cannot " + e);
 };
-var i = (t, r, e) => (M(t, r, "read from private field"), e ? e.call(t) : r.get(t)), g = (t, r, e) => {
+var i = (t, r, e) => (x(t, r, "read from private field"), e ? e.call(t) : r.get(t)), E = (t, r, e) => {
   if (r.has(t))
     throw TypeError("Cannot add the same private member more than once");
   r instanceof WeakSet ? r.add(t) : r.set(t, e);
-}, u = (t, r, e, s) => (M(t, r, "write to private field"), s ? s.call(t, e) : r.set(t, e), e);
+}, u = (t, r, e, s) => (x(t, r, "write to private field"), s ? s.call(t, e) : r.set(t, e), e);
 const HTMLEntityMap = {
   "&": "&amp;",
   "<": "&lt;",
@@ -38,8 +38,8 @@ function escapeRegExp(t) {
 function formatString(t, r, { subst: e = { format: "${{ | }}", var: "|" } } = {}) {
   const s = e.format.split(e.var).map(escapeRegExp).join(String.raw`([$\w\d-_.: ]+)`);
   return t.replace(new RegExp(s, "g"), (n, o) => {
-    var d;
-    return (d = r[o]) == null ? void 0 : d.toString();
+    var l;
+    return (l = r[o]) == null ? void 0 : l.toString();
   });
 }
 class WorkerUnreponsiveError extends Error {
@@ -75,12 +75,20 @@ class JobNotFound extends Error {
     this.worker = e, this.job = s;
   }
 }
-class JobDoneEvent extends Event {
+class JobFinishedEvent extends Event {
   constructor({ job: e, result: s }, n) {
-    super("job-done", n);
+    super("job-finished", n);
     a(this, "job");
     a(this, "result");
     this.job = e, this.result = s;
+  }
+}
+class JobErrorEvent extends Event {
+  constructor({ job: e, error: s }, n) {
+    super("job-error", n);
+    a(this, "job");
+    a(this, "error");
+    this.job = e, this.error = s;
   }
 }
 function workerLoop() {
@@ -154,15 +162,16 @@ function workerLoop() {
       }
   });
 }
-var h, p, l, c;
-const w = class extends EventTarget {
+var w, f, d, c;
+const p = class extends EventTarget {
   constructor({ url: e } = {}) {
     super();
-    g(this, h, []);
-    g(this, p, null);
-    g(this, l, void 0);
-    g(this, c, "idling");
-    u(this, l, new Worker(e ?? w.scriptUrl)), this.work();
+    E(this, w, []);
+    E(this, f, null);
+    E(this, d, void 0);
+    E(this, c, "idling");
+    a(this, "awaitJobDone", this.awaitJob);
+    u(this, d, new Worker(e ?? p.scriptUrl)), this.work();
   }
   static createJob(e, s) {
     return {
@@ -171,7 +180,7 @@ const w = class extends EventTarget {
     };
   }
   get worker() {
-    return i(this, l);
+    return i(this, d);
   }
   set worker(e) {
     this.reinit(e);
@@ -180,40 +189,45 @@ const w = class extends EventTarget {
     return i(this, c);
   }
   work() {
-    if (i(this, c) == "idling" && i(this, h).length > 0) {
+    if (i(this, c) == "idling" && i(this, w).length > 0) {
       u(this, c, "working");
-      const e = u(this, p, i(this, h).pop());
+      const e = u(this, f, i(this, w).pop());
       this.execute(e).then((s) => {
-        u(this, c, "idling"), u(this, p, null);
-        const n = new JobDoneEvent({ job: e, result: s });
+        u(this, c, "idling"), u(this, f, null);
+        const n = new JobFinishedEvent({ job: e, result: s });
         this.dispatchEvent(n), this.work();
+      }).catch((s) => {
+        const n = s;
+        console.error(n), u(this, c, "idling"), u(this, f, null);
+        const o = new JobErrorEvent({ job: e, error: n.cause });
+        this.dispatchEvent(o), this.work();
       });
     }
   }
   clearQueue() {
-    i(this, h).length = 0;
+    i(this, w).length = 0;
   }
   reinit(e) {
-    e ?? (e = new Worker(w.scriptUrl)), this.terminate(), u(this, c, "idling"), u(this, l, e), this.work();
+    e ?? (e = new Worker(p.scriptUrl)), this.terminate(), u(this, c, "idling"), u(this, d, e), this.work();
   }
   terminate() {
-    i(this, l).terminate();
+    i(this, d).terminate();
   }
   async restart(e) {
-    e ?? (e = new Worker(w.scriptUrl)), await this.shutdown(), u(this, c, "idling"), u(this, l, e), this.work();
+    e ?? (e = new Worker(p.scriptUrl)), await this.shutdown(), u(this, c, "idling"), u(this, d, e), this.work();
   }
   async shutdown() {
-    return i(this, l).postMessage({
+    return i(this, d).postMessage({
       type: "shutdown"
     }), this.awaitMessage({ type: "status", test: (e) => e.status == "shutdown" }).then((e) => (u(this, c, "shutdown"), e));
   }
   async suspend() {
-    i(this, l).postMessage({
+    i(this, d).postMessage({
       type: "suspend"
     }), u(this, c, "suspended");
   }
   async resume() {
-    i(this, l).postMessage({
+    i(this, d).postMessage({
       type: "resume"
     }), u(this, c, "idling"), this.work();
   }
@@ -223,7 +237,7 @@ const w = class extends EventTarget {
       functionCode: e.callback.toString(),
       args: e.args
     };
-    i(this, l).postMessage(s);
+    i(this, d).postMessage(s);
     const n = await this.awaitMessage({ type: "execution_result" });
     if (n.success)
       return n.returnValue;
@@ -231,45 +245,49 @@ const w = class extends EventTarget {
   }
   async run(e, s) {
     const n = this.queue(e, s);
-    return this.awaitJobDone(n);
+    return this.awaitJob(n);
   }
   queue(e, s) {
     if (!(i(this, c) == "idling" || i(this, c) == "working"))
       throw new WorkerDeadState(this, i(this, c));
     let n;
-    return typeof e == "function" ? n = w.createJob(e, s) : n = e, i(this, h).push(n), this.work(), n;
+    return typeof e == "function" ? n = p.createJob(e, s) : n = e, i(this, w).push(n), this.work(), n;
   }
   remove(e) {
-    const s = i(this, h).indexOf(e);
-    return s == -1 ? !1 : (i(this, h).splice(s, 1), !0);
+    const s = i(this, w).indexOf(e);
+    return s == -1 ? !1 : (i(this, w).splice(s, 1), !0);
   }
   awaitMessage({ type: e, test: s, timeout: n = 5e4 } = {}) {
     return new Promise((o) => {
-      let d;
-      i(this, l).addEventListener("message", (m) => {
-        const f = m.data;
-        e && f.type != e || s && !s(f) || (d && clearTimeout(d), o(f));
-      }), typeof n == "number" && (d = setTimeout(() => {
+      let l;
+      i(this, d).addEventListener("message", (m) => {
+        const h = m.data;
+        e && h.type != e || s && !s(h) || (l && clearTimeout(l), o(h));
+      }), typeof n == "number" && (l = setTimeout(() => {
         throw new WorkerUnreponsiveError(this);
       }, n));
     });
   }
-  awaitJobDone(e) {
-    if (!i(this, h).includes(e) && i(this, p) != e)
+  awaitJob(e) {
+    if (!i(this, w).includes(e) && i(this, f) != e)
       throw new JobNotFound(this, e);
-    return new Promise((s) => {
-      this.addEventListener("job-done", (n) => {
-        const o = n;
-        o.job == e && s(o.result);
-      });
+    return new Promise((s, n) => {
+      const o = (m) => {
+        const h = m;
+        h.job == e && (s(h.result), this.removeEventListener("job-finished", o));
+      }, l = (m) => {
+        const h = m;
+        h.job == e && (n(h.error), this.removeEventListener("job-error", o));
+      };
+      this.addEventListener("job-finished", o), this.addEventListener("job-error", l);
     });
   }
 };
-let WorkerJQ = w;
-h = new WeakMap(), p = new WeakMap(), l = new WeakMap(), c = new WeakMap(), a(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
+let WorkerJQ = p;
+w = new WeakMap(), f = new WeakMap(), d = new WeakMap(), c = new WeakMap(), a(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
 function observeMutation({ target: t, abortSignal: r, once: e, ...s }, n) {
-  const o = new MutationObserver((d) => {
-    e && o.disconnect(), n({ records: d, observer: o });
+  const o = new MutationObserver((l) => {
+    e && o.disconnect(), n({ records: l, observer: o });
   });
   return o.observe(t, s), r == null || r.addEventListener("abort", () => {
     o.disconnect();
@@ -280,8 +298,8 @@ function observeMutationOnce(t, r) {
 }
 function observeMutationAsync({ target: t, abortSignal: r, ...e }, s) {
   return new Promise((n) => {
-    const o = new MutationObserver((d) => {
-      o.disconnect(), n({ records: d, observer: o });
+    const o = new MutationObserver((l) => {
+      o.disconnect(), n({ records: l, observer: o });
     });
     o.observe(t, e), r == null || r.addEventListener("abort", () => {
       o.disconnect();
@@ -318,9 +336,9 @@ function isNotEmpty(t) {
   return t instanceof NodeList && t.length > 0 ? !0 : t != null;
 }
 async function executeQuery(t) {
-  var x;
+  var y;
   let r;
-  const e = t.parent ?? document.body, s = t.querySelector ?? ((k, E) => k.querySelector(E)), n = t.maxTries ?? 1 / 0, o = t.timeout ?? 1e4;
+  const e = t.parent ?? document.body, s = t.querySelector ?? ((g, b) => g.querySelector(b)), n = t.maxTries ?? 1 / 0, o = t.timeout ?? 1e4;
   if ((t.ensureDomContentLoaded ?? !0) && await awaitDomContentLoaded(), "id" in t)
     r = `#${t.id}`;
   else if ("selector" in t)
@@ -330,14 +348,14 @@ async function executeQuery(t) {
   let m = s(e, r);
   if (isNotEmpty(m))
     return m;
-  let f = 0;
-  const b = new AbortController(), v = b.signal;
-  return (x = t.abortSignal) == null || x.addEventListener("abort", () => b.abort()), new Promise((k, E) => {
-    const y = observeMutation({ target: e, abortSignal: v, childList: !0, subtree: !0, ...t.observerOptions }, () => {
-      m = s(e, r), isNotEmpty(m) ? (k(m), y.disconnect()) : f > n && (y.disconnect(), E(new WaitForElementMaxTriesError(n))), f++;
+  let h = 0;
+  const v = new AbortController(), M = v.signal;
+  return (y = t.abortSignal) == null || y.addEventListener("abort", () => v.abort()), new Promise((g, b) => {
+    const k = observeMutation({ target: e, abortSignal: M, childList: !0, subtree: !0, ...t.observerOptions }, () => {
+      m = s(e, r), isNotEmpty(m) ? (g(m), k.disconnect()) : h > n && (k.disconnect(), b(new WaitForElementMaxTriesError(n))), h++;
     });
     o != !1 && o != 1 / 0 && setTimeout(() => {
-      y.disconnect(), E(new WaitForElementTimeoutError(o));
+      k.disconnect(), b(new WaitForElementTimeoutError(o));
     }, o);
   });
 }
@@ -366,7 +384,8 @@ function waitForElementInf(t, r) {
 }
 export {
   HTMLEntityMap,
-  JobDoneEvent,
+  JobErrorEvent,
+  JobFinishedEvent,
   JobNotFound,
   WorkerDeadState,
   WorkerJQ,
