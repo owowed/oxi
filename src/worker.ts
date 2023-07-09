@@ -25,14 +25,25 @@ import {
 export * from "./worker-types";
 export * from "./worker-errors";
 
-export class JobDoneEvent extends Event {
+export class JobFinishedEvent extends Event {
     job: Job<any>;
     result: any;
 
     constructor ({ job, result }: { job: Job<any>, result: any }, options?: EventInit) {
-        super("job-done", options);
+        super("job-finished", options);
         this.job = job;
         this.result = result;
+    }
+}
+
+export class JobErrorEvent extends Event {
+    job: Job<any>;
+    error: any;
+
+    constructor ({ job, error }: { job: Job<any>, error: any }, options?: EventInit) {
+        super("job-error", options);
+        this.job = job;
+        this.error = error;
     }
 }
 
@@ -180,7 +191,15 @@ export class WorkerJQ extends EventTarget {
             this.execute(job).then(result => {
                 this.#state = "idling";
                 this.#currentlyExecutingJob = null;
-                const event = new JobDoneEvent({ job, result });
+                const event = new JobFinishedEvent({ job, result });
+                this.dispatchEvent(event);
+                this.work();
+            }).catch(error => {
+                const workerScriptError = error as WorkerScriptError;
+                console.error(workerScriptError);
+                this.#state = "idling";
+                this.#currentlyExecutingJob = null;
+                const event = new JobErrorEvent({ job, error: workerScriptError.cause });
                 this.dispatchEvent(event);
                 this.work();
             });
@@ -260,7 +279,7 @@ export class WorkerJQ extends EventTarget {
 
     async run<Result, Args extends any[]>(callback: (...args: Args) => Result, args?: Args): Promise<Result> {
         const job = this.queue(callback, args);
-        return this.awaitJobDone(job);
+        return this.awaitJob(job);
     }
 
     queue<TJob extends Job<any>>(job: TJob): Readonly<TJob>;
@@ -326,16 +345,28 @@ export class WorkerJQ extends EventTarget {
         });
     }
 
-    awaitJobDone<Result>(job: Job<Result>): Promise<Result> {
+    awaitJob<Result>(job: Job<Result>): Promise<Result> {
         if (!this.#jobQueue.includes(job) && this.#currentlyExecutingJob != job) throw new JobNotFound(this, job);
 
-        return new Promise(resolve => {
-            this.addEventListener("job-done", (ev) => {
-                const event = ev as JobDoneEvent;
+        return new Promise((resolve, reject) => {
+            const jobFinishedCallback = (ev: any) => {
+                const event = ev as JobFinishedEvent;
                 if (event.job == job) {
                     resolve(event.result);
+                    this.removeEventListener("job-finished", jobFinishedCallback);
                 }
-            });
-        })
+            };
+            const jobErrorCallback = (ev: any) => {
+                const event = ev as JobErrorEvent;
+                if (event.job == job) {
+                    reject(event.error);
+                    this.removeEventListener("job-error", jobFinishedCallback);
+                }
+            };
+            this.addEventListener("job-finished", jobFinishedCallback);
+            this.addEventListener("job-error", jobErrorCallback)
+        });
     }
+
+    awaitJobDone = this.awaitJob;
 }
