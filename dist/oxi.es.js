@@ -211,7 +211,7 @@ const p = class extends EventTarget {
     e ?? (e = new Worker(p.scriptUrl)), this.terminate(), u(this, c, "idling"), u(this, d, e), this.work();
   }
   terminate() {
-    i(this, d).terminate();
+    i(this, d).terminate(), u(this, c, "terminated");
   }
   async restart(e) {
     e ?? (e = new Worker(p.scriptUrl)), await this.shutdown(), u(this, c, "idling"), u(this, d, e), this.work();
