@@ -98,6 +98,15 @@ export async function awaitDomContentLoaded(): Promise<void> {
     });
 }
 
+function isNotEmpty<T>(x: T): x is Exclude<T, null> {
+    if (x instanceof NodeList) {
+        return true;
+    }
+    else {
+        return x != null;
+    }
+}
+
 export async function executeQuery
     <QueryFnResult, QueryFn extends QueryFnDefault<QueryFnResult> = QueryFnDefault<QueryFnResult>>
     (options: QueryOptions<QueryFnResult, QueryFn>): Promise<QueryFnResult>
@@ -123,7 +132,7 @@ export async function executeQuery
 
     let result: QueryFnResult | null = querySelector(parent, selector);
 
-    if (result) return result;
+    if (isNotEmpty(result)) return result;
 
     let tries = 0;
 
@@ -135,7 +144,7 @@ export async function executeQuery
     return new Promise((resolve, reject) => {
         const mutation = observeMutation({ target: parent, abortSignal, childList: true, subtree: true, ...options.observerOptions }, () => {
             result = querySelector(parent, selector);
-            if (result != null) {
+            if (isNotEmpty(result)) {
                 resolve(result);
                 mutation.disconnect();
             }
