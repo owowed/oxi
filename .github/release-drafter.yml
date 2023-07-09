@@ -36,24 +36,30 @@ template: |
 autolabeler:
   - label: bugfix
     title: '/fix/i'
-    body: '/fix/i'
+    branch:
+      - '/fix\/.+/'
 
   - label: feature
     title: '/feat(ure)?/i'
-    body: '/feat(ure)?/i'
+    branch:
+      - '/feat\/.+/'
 
   - label: refactor
     title: '/refactor/i'
-    body: '/refactor/i'
+    branch:
+      - '/refactor\/.+/'
 
   - label: docs
     title: '/doc(s|umentation)/i'
-    body: '/doc(s|umentation)/i'
     files:
       - '*.md'
+      - '.gitignore'
+    branch:
+      - '/docs\/.+/'
 
   - label: ci
     title: '/ci/i'
-    body: '/ci/i'
     files:
       - '.github/**/*.yml'
+    branch:
+      - '/ci\/.+/'
