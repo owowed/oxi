@@ -30,5 +30,22 @@ jobs:
       contents: write
     with:
       tag_name: ${{ needs.release-draft.outputs.tag_name }}
+  
+  post-release-draft:
+    needs: update-package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      tag_name: ${{ steps.release-draft.outputs.tag_name }}
+    steps:
+      - name: Draft release
+        id: release-draft
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          commitish: refs/heads/package
 
   
