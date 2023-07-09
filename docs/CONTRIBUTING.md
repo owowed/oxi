@@ -12,9 +12,12 @@
 
 - Label `major`, `minor`, and `patch` accordingly to [Semantic Versioning](https://semver.org/), with few additional rules:
     - Any breaking/backward incompatible changes or removal of features must be labeled `major`.
+
     - New features that are backward compatible must be labeled `minor`.
         - Except for new TypeScript type definitions or JSDoc comments, that do not change how the runtime implementation work, must be labeled `patch`. 
+
     - Bug fixes or code refactors that are backward compatible must be labeled `patch`.
+        - Enhancements or bugfixes toward CI or build tools must be labeled `patch`.
 
 - Label `feature`, `docs`, `ci`, `refactor`, and `bugfix` are only used for Pull Requests, while `feature-request` and `bug` are only used for Issues.
     - Please label them accordingly. For example: pull request featuring `feat` commit, add the `feature` label.
