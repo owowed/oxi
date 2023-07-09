@@ -155,8 +155,8 @@ export async function executeQuery
     });
 }
 
-export function waitForElement<Elem extends Element>(selector: string, options?: QueryOptions<Elem>): Promise<Elem>;
-export function waitForElement<Elem extends Element>(selector: string, parent: ParentNode, options?: QueryOptions<Elem>): Promise<Elem>;
+export function waitForElement<Elem extends Element>(selector: string, options?: Partial<QueryOptions<Elem>>): Promise<Elem>;
+export function waitForElement<Elem extends Element>(selector: string, parent: ParentNode, options?: Partial<QueryOptions<Elem>>): Promise<Elem>;
 export function waitForElement(selector: string, arg1?: any, arg2?: any): any
 {
     let options: QueryOptions<Element>;
@@ -180,21 +180,21 @@ export function waitForElement(selector: string, arg1?: any, arg2?: any): any
     return executeQuery({ selector, ...options });
 }
 
-export function waitForElementAll<Elem extends Element>(selector: string, options?: QueryOptions<NodeListOf<Elem>>): Promise<Elem[]>;
-export function waitForElementAll<Elems extends Element[]>(selector: string, options?: QueryOptions<NodeListOf<Element>>): Promise<Elems>;
-export function waitForElementAll(selector: string, options?: QueryOptions<NodeListOf<Element>>): Promise<Element[]>
+export function waitForElementAll<Elem extends Element>(selector: string, options?: Partial<QueryOptions<NodeListOf<Elem>>>): Promise<Elem[]>;
+export function waitForElementAll<Elems extends Element[]>(selector: string, options?: Partial<QueryOptions<NodeListOf<Element>>>): Promise<Elems>;
+export function waitForElementAll(selector: string, options?: Partial<QueryOptions<NodeListOf<Element>>>): Promise<Element[]>
 {
     return executeQuery<NodeListOf<Element>>({ selector, ...options }).then(i => Array.from(i));
 }
 
-export function waitForElementParent<Elem extends Element>(parent: ParentNode, selector: string, options?: QueryOptions<Elem>): Promise<Elem> {
+export function waitForElementParent<Elem extends Element>(parent: ParentNode, selector: string, options?: Partial<QueryOptions<Elem>>): Promise<Elem> {
     return executeQuery({ selector, parent, ...options });
 }
 
-export function waitForElementId<Elem extends Element>(id: string, options?: QueryOptions<Elem>): Promise<Elem> {
+export function waitForElementId<Elem extends Element>(id: string, options?: Partial<QueryOptions<Elem>>): Promise<Elem> {
     return executeQuery<Elem>({ id, ...options });
 }
 
-export function waitForElementInf<Elem extends Element>(selector: string, options?: QueryOptions<Elem>): Promise<Elem> {
+export function waitForElementInf<Elem extends Element>(selector: string, options?: Partial<QueryOptions<Elem>>): Promise<Elem> {
     return executeQuery({ selector, timeout: Infinity, ...options });
 }
