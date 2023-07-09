@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "declarationDir": "./dist",
+        "declaration": true,
+        "target": "ES2022",
+        "module": "ES2022",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+    },
+    "exclude": [
+        "./vite.config.ts",
+        "./node_modules",
+        "./dist"
+    ]
+}

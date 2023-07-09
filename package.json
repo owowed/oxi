@@ -1,0 +1,44 @@
+{
+  "name": "@owowed/oxi",
+  "version": "1.1.1",
+  "description": "Userscript library",
+  "author": "owowed",
+  "license": "LGPL-3.0",
+  "type": "module",
+  "main": "dist/oxi.umd.js",
+  "module": "dist/oxi.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/oxi.es.js",
+      "require": "./dist/oxi.umd.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "build": "npx vite build && npx tsc --emitDeclarationOnly"
+  },
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owowed/oxi.git",
+    "directory": "."
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": "^16.14.0 || >=18.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.0",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.8",
+    "tslib": "^2.5.3",
+    "typescript": "^5.1.3",
+    "vite": "^4.3.9"
+  }
+}
