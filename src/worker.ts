@@ -248,6 +248,8 @@ export class WorkerJQ extends EventTarget {
         } satisfies ParentMessageSuspend);
 
         this.#state = "suspended";
+
+        return this.awaitMessage({ type: "status", test: message => message.status == "suspended" });
     }
 
     async resume() {
@@ -255,8 +257,11 @@ export class WorkerJQ extends EventTarget {
             type: "resume"
         } satisfies ParentMessageResume);
 
-        this.#state = "idling";
-        this.work();
+        return this.awaitMessage({ type: "status", test: message => message.status == "idling" }).then(result => {
+            this.#state = "idling";
+            this.work();
+            return result;
+        });
     }
 
     async execute<Result>(job: Job<Result>): Promise<Result> {
