@@ -36,6 +36,7 @@
   "devDependencies": {
     "@types/node": "^20.3.0",
     "nodemon": "^2.0.22",
+    "normalize-url": "^8.0.0",
     "prettier": "^2.8.8",
     "tslib": "^2.5.3",
     "typescript": "^5.1.3",
