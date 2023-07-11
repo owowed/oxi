@@ -1,17 +1,17 @@
-import { WorkerJQ } from "worker";
 
+import { Tasker } from "tasker";
 
-export interface WorkerPoolOptions {
+export interface TaskerPoolOptions {
     minPoolSize: number;
     maxPoolSize: number;
 }
 
-export class WorkerPool {
-    #workerQueue: WorkerJQ[] = [];
+export class TaskerPool {
+    #workerQueue: Tasker[] = [];
     #minPoolSize = 4;
     #maxPoolSize = 6;
 
-    constructor ({ minPoolSize, maxPoolSize }: Partial<WorkerPoolOptions> = {}) {
+    constructor ({ minPoolSize, maxPoolSize }: Partial<TaskerPoolOptions> = {}) {
         // @ts-expect-error
         this.#minPoolSize ??= minPoolSize;
         // @ts-expect-error
