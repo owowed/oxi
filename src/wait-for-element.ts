@@ -145,8 +145,8 @@ export async function executeQuery
         const mutation = observeMutation({ target: parent, abortSignal, childList: true, subtree: true, ...options.observerOptions }, () => {
             result = querySelector(parent, selector);
             if (isNotEmpty(result)) {
-                resolve(result);
                 mutation.disconnect();
+                resolve(result);
             }
             else if (tries > maxTries) {
                 mutation.disconnect();
@@ -166,6 +166,8 @@ export async function executeQuery
 
 export function waitForElement<Elem extends Element>(selector: string, options?: Partial<QueryOptions<Elem>>): Promise<Elem>;
 export function waitForElement<Elem extends Element>(selector: string, parent: ParentNode, options?: Partial<QueryOptions<Elem>>): Promise<Elem>;
+export function waitForElement<T extends keyof HTMLElementTagNameMap>(selector: T, options?: Partial<QueryOptions<HTMLElementTagNameMap[T]>>): Promise<HTMLElementTagNameMap[T]>;
+export function waitForElement<T extends keyof HTMLElementTagNameMap>(selector: T, parent: ParentNode, options?: Partial<QueryOptions<HTMLElementTagNameMap[T]>>): Promise<HTMLElementTagNameMap[T]>;
 export function waitForElement(selector: string, arg1?: any, arg2?: any): any
 {
     let options: QueryOptions<Element>;
