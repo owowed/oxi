@@ -18,7 +18,7 @@ export interface InterceptedRequest extends Request {
 }
 export interface InterceptedResponse extends Response {
 }
-export type RuleTypeMap = {
+export type RuleMap = {
     request: RequestRule;
     response: ResponseRule;
 };
@@ -36,7 +36,7 @@ export declare class NetworkInterceptor {
     interceptRequest(request: Request): InterceptedRequest;
     interceptResponse(response: Response): InterceptedResponse;
     addRule(rule: RequestRule | ResponseRule): Readonly<Rule>;
-    addRule<T extends keyof RuleTypeMap>(type: T, url: Matcher, callback: RuleTypeMap[T]["callback"], rule?: Omit<RuleTypeMap[T], "url" | "callback">): Readonly<Rule>;
+    addRule<T extends keyof RuleMap>(type: T, url: Matcher, callback: RuleMap[T]["callback"], rule?: Omit<RuleMap[T], "url" | "callback">): Readonly<Rule>;
     addRule(type: string, url: Matcher, callback: (resource: InterceptedRequest | InterceptedResponse) => void, rule?: Omit<Rule, "url" | "callback">): Readonly<Rule>;
     removeRule(rule: Rule): void;
     clearRules(): void;
