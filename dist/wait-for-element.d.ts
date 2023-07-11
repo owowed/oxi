@@ -82,6 +82,8 @@ export declare function awaitDomContentLoaded(): Promise<void>;
 export declare function executeQuery<QueryFnResult, QueryFn extends QueryFnDefault<QueryFnResult> = QueryFnDefault<QueryFnResult>>(options: QueryOptions<QueryFnResult, QueryFn>): Promise<QueryFnResult>;
 export declare function waitForElement<Elem extends Element>(selector: string, options?: Partial<QueryOptions<Elem>>): Promise<Elem>;
 export declare function waitForElement<Elem extends Element>(selector: string, parent: ParentNode, options?: Partial<QueryOptions<Elem>>): Promise<Elem>;
+export declare function waitForElement<T extends keyof HTMLElementTagNameMap>(selector: T, options?: Partial<QueryOptions<HTMLElementTagNameMap[T]>>): Promise<HTMLElementTagNameMap[T]>;
+export declare function waitForElement<T extends keyof HTMLElementTagNameMap>(selector: T, parent: ParentNode, options?: Partial<QueryOptions<HTMLElementTagNameMap[T]>>): Promise<HTMLElementTagNameMap[T]>;
 export declare function waitForElementAll<Elem extends Element>(selector: string, options?: Partial<QueryOptions<NodeListOf<Elem>>>): Promise<Elem[]>;
 export declare function waitForElementAll<Elems extends Element[]>(selector: string, options?: Partial<QueryOptions<NodeListOf<Element>>>): Promise<Elems>;
 export declare function waitForElementParent<Elem extends Element>(parent: ParentNode, selector: string, options?: Partial<QueryOptions<Elem>>): Promise<Elem>;

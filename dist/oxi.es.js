@@ -352,7 +352,7 @@ async function executeQuery(r) {
   const R = new AbortController(), m = R.signal;
   return (b = r.abortSignal) == null || b.addEventListener("abort", () => R.abort()), new Promise((k, y) => {
     const E = observeMutation({ target: t, abortSignal: m, childList: !0, subtree: !0, ...r.observerOptions }, () => {
-      c = n(t, e), isNotEmpty(c) ? (k(c), E.disconnect()) : u > s && (E.disconnect(), y(new WaitForElementMaxTriesError(s))), u++;
+      c = n(t, e), isNotEmpty(c) ? (E.disconnect(), k(c)) : u > s && (E.disconnect(), y(new WaitForElementMaxTriesError(s))), u++;
     });
     o != !1 && o != 1 / 0 && setTimeout(() => {
       E.disconnect(), y(new WaitForElementTimeoutError(o));
