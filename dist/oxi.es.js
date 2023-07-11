@@ -1,6 +1,6 @@
 var I = Object.defineProperty;
-var W = (r, e, t) => e in r ? I(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
-var h = (r, e, t) => (W(r, typeof e != "symbol" ? e + "" : e, t), t), A = (r, e, t) => {
+var $ = (r, e, t) => e in r ? I(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
+var l = (r, e, t) => ($(r, typeof e != "symbol" ? e + "" : e, t), t), A = (r, e, t) => {
   if (!e.has(r))
     throw TypeError("Cannot " + t);
 };
@@ -8,7 +8,7 @@ var i = (r, e, t) => (A(r, e, "read from private field"), t ? t.call(r) : e.get(
   if (e.has(r))
     throw TypeError("Cannot add the same private member more than once");
   e instanceof WeakSet ? e.add(r) : e.set(r, t);
-}, l = (r, e, t, n) => (A(r, e, "write to private field"), n ? n.call(r, t) : e.set(r, t), t);
+}, h = (r, e, t, n) => (A(r, e, "write to private field"), n ? n.call(r, t) : e.set(r, t), t);
 const HTMLEntityMap = {
   "&": "&amp;",
   "<": "&lt;",
@@ -37,97 +37,88 @@ function escapeRegExp(r) {
 }
 function formatString(r, e, { subst: t = { format: "${{ | }}", var: "|" } } = {}) {
   const n = t.format.split(t.var).map(escapeRegExp).join(String.raw`([$\w\d-_.: ]+)`);
-  return r.replace(new RegExp(n, "g"), (s, o) => {
-    var a;
-    return (a = e[o]) == null ? void 0 : a.toString();
+  return r.replace(new RegExp(n, "g"), (s, a) => {
+    var o;
+    return (o = e[a]) == null ? void 0 : o.toString();
   });
 }
-class WorkerUnreponsiveError extends Error {
+class TaskerUnreponsiveError extends Error {
   constructor(t) {
     super("worker is unresponsive");
-    h(this, "name", this.constructor.name);
-    h(this, "worker");
-    this.worker = t;
+    l(this, "name", this.constructor.name);
+    l(this, "tasker");
+    this.tasker = t;
   }
 }
-class WorkerScriptError extends Error {
+class TaskerScriptError extends Error {
   constructor(t, n) {
     super(`script error caused by worker (${n.name})`);
-    h(this, "name", this.constructor.name);
-    h(this, "worker");
-    this.worker = t, this.cause = n;
+    l(this, "name", this.constructor.name);
+    l(this, "tasker");
+    this.tasker = t, this.cause = n;
   }
 }
-class WorkerDeadState extends Error {
+class TaskerDeadState extends Error {
   constructor(t, n) {
     super(`worker is in dead state (${n})`);
-    h(this, "name", this.constructor.name);
-    h(this, "worker");
-    this.worker = t;
+    l(this, "name", this.constructor.name);
+    l(this, "tasker");
+    this.tasker = t;
   }
 }
-class JobNotFound extends Error {
+class TaskNotFound extends Error {
   constructor(t, n) {
     super("job not found in worker");
-    h(this, "name", this.constructor.name);
-    h(this, "worker");
-    h(this, "job");
-    this.worker = t, this.job = n;
+    l(this, "name", this.constructor.name);
+    l(this, "tasker");
+    l(this, "task");
+    this.tasker = t, this.task = n;
   }
 }
-class JobFinishedEvent extends Event {
-  constructor({ job: t, result: n }, s) {
-    super("job-finished", s);
-    h(this, "job");
-    h(this, "result");
-    this.job = t, this.result = n;
+class TaskFulfilledEvent extends Event {
+  constructor({ task: t, result: n }, s) {
+    super("task_fulfilled", s);
+    l(this, "task");
+    l(this, "result");
+    this.task = t, this.result = n;
   }
 }
-class JobErrorEvent extends Event {
-  constructor({ job: t, error: n }, s) {
-    super("job-error", s);
-    h(this, "job");
-    h(this, "error");
-    this.job = t, this.error = n;
+class TaskErrorEvent extends Event {
+  constructor({ task: t, error: n }, s) {
+    super("task_error", s);
+    l(this, "task");
+    l(this, "error");
+    this.task = t, this.error = n;
   }
 }
 function workerLoop() {
   let state = "idling";
-  function executeParentCode(data) {
+  function runTask(data) {
     state = "working";
-    const callback = eval(`(${data.functionCode})`), args = data.args;
+    const callback = eval(`(${data.callbackCode})`), args = data.args;
     try {
       const r = callback(...args);
-      self.postMessage({
-        type: "execution_result",
-        success: !0,
+      r instanceof Promise ? r.then((e) => {
+        self.postMessage({
+          type: "task_fulfilled",
+          returnValue: e
+        });
+      }).catch((e) => {
+        self.postMessage({
+          type: "task_error",
+          error: e
+        });
+      }) : self.postMessage({
+        type: "task_fulfilled",
         returnValue: r
       });
     } catch (r) {
       self.postMessage({
-        type: "execution_result",
-        success: !1,
+        type: "task_error",
         error: r
       });
     }
     state = "idling";
-  }
-  async function executeParentCodeAsync(data) {
-    state = "working";
-    const callback = eval(`(${data.functionCode})`), args = data.args;
-    callback(...args).then((r) => {
-      self.postMessage({
-        type: "execution_result",
-        success: !0,
-        returnValue: r
-      }), state = "idling";
-    }).catch((r) => {
-      self.postMessage({
-        type: "execution_result",
-        success: !1,
-        error: r
-      }), state = "idling";
-    });
   }
   self.addEventListener("message", (r) => {
     const e = r.data;
@@ -144,11 +135,8 @@ function workerLoop() {
     }
     if (state != "suspended")
       switch (e.type) {
-        case "execute":
-          executeParentCode(e);
-          break;
-        case "execute_async":
-          e.shouldAwait ? executeParentCodeAsync(e) : executeParentCode(e);
+        case "task_execute":
+          runTask(e);
           break;
         case "suspend":
           state = "suspended";
@@ -162,147 +150,157 @@ function workerLoop() {
       }
   });
 }
-var w, x, f, d;
-const P = class extends EventTarget {
+var w, b, d, f;
+const M = class extends EventTarget {
   constructor({ url: t } = {}) {
     super();
     p(this, w, []);
-    p(this, x, null);
-    p(this, f, void 0);
-    p(this, d, "idling");
-    h(this, "awaitJobDone", this.awaitJob);
-    l(this, f, new Worker(t ?? P.scriptUrl)), this.work();
+    p(this, b, null);
+    p(this, d, void 0);
+    p(this, f, "idling");
+    h(this, d, new Worker(t ?? M.scriptUrl)), this.work();
   }
-  static createJob(t, n) {
+  static createTask(t, n) {
     return {
       callback: t,
       args: n ?? []
     };
   }
   get worker() {
-    return i(this, f);
+    return i(this, d);
   }
   set worker(t) {
     this.reinit(t);
   }
-  get state() {
-    return i(this, d);
+  /**
+   * Returns Tasker status.
+   * 
+   * There are 6 Tasker status available:
+   * - `idling` - Tasker is doing nothing.
+   * - `working` - Tasker is executing remaining task in the queue.
+   * - `suspended` - Tasker is executing a task once in the queue, and then no longer accept new task. Tasks that are not executed still remain in the queue.
+   * - `shutdown` - Tasker is executing a task once in the queue, and then the `Worker` is closed. It will not execute remaining task in the queue. Same as "suspended", the tasks in the queue still remain.
+   * - `terminated` - Tasker is immediately terminated, abandoning the task its executing. It will not execute remaining task in the queue. Same as "suspended", the tasks in the queue still remain.
+   * - `error` - The last task Tasker executed throws an error, but still continuing remaining tasks.
+   */
+  get status() {
+    return i(this, f);
   }
   work() {
-    if (i(this, d) == "idling" && i(this, w).length > 0) {
-      l(this, d, "working");
-      const t = l(this, x, i(this, w).pop());
-      this.execute(t).then((n) => {
-        l(this, d, "idling"), l(this, x, null);
-        const s = new JobFinishedEvent({ job: t, result: n });
-        this.dispatchEvent(s), this.work();
-      }).catch((n) => {
-        const s = n;
-        console.error(s), l(this, d, "idling"), l(this, x, null);
-        const o = new JobErrorEvent({ job: t, error: s.cause });
-        this.dispatchEvent(o), this.work();
-      });
+    if (i(this, f) == "idling" && i(this, w).length > 0) {
+      h(this, f, "working");
+      const t = h(this, b, i(this, w).pop()), n = () => {
+        h(this, f, "idling"), h(this, b, null), this.work();
+      };
+      this.execute(t).then(n).catch(n);
     }
+  }
+  terminate() {
+    i(this, d).terminate(), h(this, f, "terminated");
+  }
+  reinit(t) {
+    t ?? (t = new Worker(M.scriptUrl)), this.terminate(), h(this, f, "idling"), h(this, d, t), this.work();
+  }
+  async shutdown() {
+    return i(this, d).postMessage({
+      type: "shutdown"
+    }), this.awaitMessage({ type: "status", test: (t) => t.status == "shutdown" }).then((t) => (h(this, f, "shutdown"), t));
+  }
+  async restart(t) {
+    t ?? (t = new Worker(M.scriptUrl)), await this.shutdown(), h(this, f, "idling"), h(this, d, t), this.work();
+  }
+  async suspend() {
+    return i(this, d).postMessage({
+      type: "suspend"
+    }), h(this, f, "suspended"), this.awaitMessage({ type: "status", test: (t) => t.status == "suspended" });
+  }
+  async resume() {
+    return i(this, d).postMessage({
+      type: "resume"
+    }), this.awaitMessage({ type: "status", test: (t) => t.status == "idling" }).then((t) => (h(this, f, "idling"), this.work(), t));
+  }
+  async execute(t) {
+    const n = {
+      type: "task_execute",
+      callbackCode: t.callback.toString(),
+      args: t.args
+    };
+    i(this, d).postMessage(n);
+    const s = await this.awaitMessage({
+      test: (a) => a.type == "task_fulfilled" || a.type == "task_error"
+    });
+    if (s.type == "task_fulfilled") {
+      const a = new TaskFulfilledEvent({ task: t, result: s.returnValue });
+      return this.dispatchEvent(a), s.returnValue;
+    } else {
+      const a = new TaskerScriptError(this, s.error), o = new TaskErrorEvent({ task: t, error: a });
+      throw this.dispatchEvent(o), a;
+    }
+  }
+  async run(t, n) {
+    const s = this.queue(t, n);
+    return this.awaitTask(s);
+  }
+  queue(t, n) {
+    if (!(i(this, f) == "idling" || i(this, f) == "working"))
+      throw new TaskerDeadState(this, i(this, f));
+    let s;
+    return typeof t == "function" ? s = M.createTask(t, n) : s = t, i(this, w).push(s), this.work(), s;
+  }
+  remove(t) {
+    const n = i(this, w).indexOf(t);
+    if (n == -1)
+      throw new TaskNotFound(this, t);
+    return i(this, w).splice(n, 1), !0;
   }
   clearQueue() {
     i(this, w).length = 0;
   }
-  reinit(t) {
-    t ?? (t = new Worker(P.scriptUrl)), this.terminate(), l(this, d, "idling"), l(this, f, t), this.work();
-  }
-  terminate() {
-    i(this, f).terminate(), l(this, d, "terminated");
-  }
-  async restart(t) {
-    t ?? (t = new Worker(P.scriptUrl)), await this.shutdown(), l(this, d, "idling"), l(this, f, t), this.work();
-  }
-  async shutdown() {
-    return i(this, f).postMessage({
-      type: "shutdown"
-    }), this.awaitMessage({ type: "status", test: (t) => t.status == "shutdown" }).then((t) => (l(this, d, "shutdown"), t));
-  }
-  async suspend() {
-    return i(this, f).postMessage({
-      type: "suspend"
-    }), l(this, d, "suspended"), this.awaitMessage({ type: "status", test: (t) => t.status == "suspended" });
-  }
-  async resume() {
-    return i(this, f).postMessage({
-      type: "resume"
-    }), this.awaitMessage({ type: "status", test: (t) => t.status == "idling" }).then((t) => (l(this, d, "idling"), this.work(), t));
-  }
-  async execute(t) {
-    const n = {
-      type: "execute",
-      functionCode: t.callback.toString(),
-      args: t.args
-    };
-    i(this, f).postMessage(n);
-    const s = await this.awaitMessage({ type: "execution_result" });
-    if (s.success)
-      return s.returnValue;
-    throw new WorkerScriptError(this, s.error);
-  }
-  async run(t, n) {
-    const s = this.queue(t, n);
-    return this.awaitJob(s);
-  }
-  queue(t, n) {
-    if (!(i(this, d) == "idling" || i(this, d) == "working"))
-      throw new WorkerDeadState(this, i(this, d));
-    let s;
-    return typeof t == "function" ? s = P.createJob(t, n) : s = t, i(this, w).push(s), this.work(), s;
-  }
-  remove(t) {
-    const n = i(this, w).indexOf(t);
-    return n == -1 ? !1 : (i(this, w).splice(n, 1), !0);
-  }
   awaitMessage({ type: t, test: n, timeout: s = 5e4 } = {}) {
-    return new Promise((o) => {
-      let a;
-      i(this, f).addEventListener("message", (c) => {
+    return new Promise((a) => {
+      let o;
+      i(this, d).addEventListener("message", (c) => {
         const u = c.data;
-        t && u.type != t || n && !n(u) || (a && clearTimeout(a), o(u));
-      }), typeof s == "number" && (a = setTimeout(() => {
-        throw new WorkerUnreponsiveError(this);
+        t && (Array.isArray(t) && !t.includes(u.type) || u.type != t) || n && !n(u) || (o && clearTimeout(o), a(u));
+      }, { once: !0 }), typeof s == "number" && (o = setTimeout(() => {
+        throw new TaskerUnreponsiveError(this);
       }, s));
     });
   }
-  awaitJob(t) {
-    if (!i(this, w).includes(t) && i(this, x) != t)
-      throw new JobNotFound(this, t);
+  awaitTask(t) {
+    if (!i(this, w).includes(t) && i(this, b) != t)
+      throw new TaskNotFound(this, t);
     return new Promise((n, s) => {
-      const o = (c) => {
-        const u = c;
-        u.job == t && (n(u.result), this.removeEventListener("job-finished", o));
-      }, a = (c) => {
-        const u = c;
-        u.job == t && (s(u.error), this.removeEventListener("job-error", o));
-      };
-      this.addEventListener("job-finished", o), this.addEventListener("job-error", a);
+      this.addEventListener("task_fulfilled", (a) => {
+        const o = a;
+        o.task == t && n(o.result);
+      }, { once: !0 }), this.addEventListener("task_error", (a) => {
+        const o = a;
+        o.task == t && s(o.error);
+      }, { once: !0 });
     });
   }
 };
-let WorkerJQ = P;
-w = new WeakMap(), x = new WeakMap(), f = new WeakMap(), d = new WeakMap(), h(WorkerJQ, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
+let Tasker = M;
+w = new WeakMap(), b = new WeakMap(), d = new WeakMap(), f = new WeakMap(), l(Tasker, "scriptUrl", `data:text/javascript;charset=utf-8,(${workerLoop.toString()}).call(this)`);
 function observeMutation({ target: r, abortSignal: e, once: t, ...n }, s) {
-  const o = new MutationObserver((a) => {
-    t && o.disconnect(), s({ records: a, observer: o });
+  const a = new MutationObserver((o) => {
+    t && a.disconnect(), s({ records: o, observer: a });
   });
-  return o.observe(r, n), e == null || e.addEventListener("abort", () => {
-    o.disconnect();
-  }), o;
+  return a.observe(r, n), e == null || e.addEventListener("abort", () => {
+    a.disconnect();
+  }), a;
 }
 function observeMutationOnce(r, e) {
   return observeMutation({ once: !0, ...r }, e);
 }
 function observeMutationAsync({ target: r, abortSignal: e, ...t }, n) {
   return new Promise((s) => {
-    const o = new MutationObserver((a) => {
-      o.disconnect(), s({ records: a, observer: o });
+    const a = new MutationObserver((o) => {
+      a.disconnect(), s({ records: o, observer: a });
     });
-    o.observe(r, t), e == null || e.addEventListener("abort", () => {
-      o.disconnect();
+    a.observe(r, t), e == null || e.addEventListener("abort", () => {
+      a.disconnect();
     });
   });
 }
@@ -310,19 +308,19 @@ const makeMutationObserver = observeMutation;
 class WaitForElementTimeoutError extends Error {
   constructor(t) {
     super(`wait for element timeout for ${t}ms`);
-    h(this, "name", this.constructor.name);
+    l(this, "name", this.constructor.name);
   }
 }
 class WaitForElementMaxTriesError extends Error {
   constructor(t) {
     super(`wait for element out of tries (max tries: ${t})`);
-    h(this, "name", this.constructor.name);
+    l(this, "name", this.constructor.name);
   }
 }
 class WaitForElementMissingOptionError extends Error {
   constructor() {
     super(...arguments);
-    h(this, "name", this.constructor.name);
+    l(this, "name", this.constructor.name);
   }
 }
 async function awaitDomContentLoaded() {
@@ -336,9 +334,9 @@ function isNotEmpty(r) {
   return r instanceof NodeList && r.length > 0 ? !0 : r != null;
 }
 async function executeQuery(r) {
-  var b;
+  var E;
   let e;
-  const t = r.parent ?? document.body, n = r.querySelector ?? ((k, y) => k.querySelector(y)), s = r.maxTries ?? 1 / 0, o = r.timeout ?? 1e4;
+  const t = r.parent ?? document.body, n = r.querySelector ?? ((v, k) => v.querySelector(k)), s = r.maxTries ?? 1 / 0, a = r.timeout ?? 1e4;
   if ((r.ensureDomContentLoaded ?? !0) && await awaitDomContentLoaded(), "id" in r)
     e = `#${r.id}`;
   else if ("selector" in r)
@@ -349,14 +347,14 @@ async function executeQuery(r) {
   if (isNotEmpty(c))
     return c;
   let u = 0;
-  const R = new AbortController(), m = R.signal;
-  return (b = r.abortSignal) == null || b.addEventListener("abort", () => R.abort()), new Promise((k, y) => {
-    const E = observeMutation({ target: t, abortSignal: m, childList: !0, subtree: !0, ...r.observerOptions }, () => {
-      c = n(t, e), isNotEmpty(c) ? (E.disconnect(), k(c)) : u > s && (E.disconnect(), y(new WaitForElementMaxTriesError(s))), u++;
+  const L = new AbortController(), m = L.signal;
+  return (E = r.abortSignal) == null || E.addEventListener("abort", () => L.abort()), new Promise((v, k) => {
+    const y = observeMutation({ target: t, abortSignal: m, childList: !0, subtree: !0, ...r.observerOptions }, () => {
+      c = n(t, e), isNotEmpty(c) ? (y.disconnect(), v(c)) : u > s && (y.disconnect(), k(new WaitForElementMaxTriesError(s))), u++;
     });
-    o != !1 && o != 1 / 0 && setTimeout(() => {
-      E.disconnect(), y(new WaitForElementTimeoutError(o));
-    }, o);
+    a != !1 && a != 1 / 0 && setTimeout(() => {
+      y.disconnect(), k(new WaitForElementTimeoutError(a));
+    }, a);
   });
 }
 function waitForElement(r, e, t) {
@@ -394,22 +392,22 @@ const DATA_URL_DEFAULT_MIME_TYPE = "text/plain", DATA_URL_DEFAULT_CHARSET = "us-
     return !1;
   }
 }, normalizeDataURL = (r, { stripHash: e }) => {
-  var b;
+  var E;
   const t = /^data:(?<type>[^,]*?),(?<data>[^#]*?)(?:#(?<hash>.*))?$/.exec(r);
   if (!t)
     throw new Error(`Invalid URL: ${r}`);
-  let { type: n, data: s, hash: o } = t.groups;
-  const a = n.split(";");
-  o = e ? "" : o;
+  let { type: n, data: s, hash: a } = t.groups;
+  const o = n.split(";");
+  a = e ? "" : a;
   let c = !1;
-  a[a.length - 1] === "base64" && (a.pop(), c = !0);
-  const u = ((b = a.shift()) == null ? void 0 : b.toLowerCase()) ?? "", m = [
-    ...a.map((k) => {
-      let [y, E = ""] = k.split("=").map((U) => U.trim());
-      return y === "charset" && (E = E.toLowerCase(), E === DATA_URL_DEFAULT_CHARSET) ? "" : `${y}${E ? `=${E}` : ""}`;
+  o[o.length - 1] === "base64" && (o.pop(), c = !0);
+  const u = ((E = o.shift()) == null ? void 0 : E.toLowerCase()) ?? "", m = [
+    ...o.map((v) => {
+      let [k, y = ""] = v.split("=").map((U) => U.trim());
+      return k === "charset" && (y = y.toLowerCase(), y === DATA_URL_DEFAULT_CHARSET) ? "" : `${k}${y ? `=${y}` : ""}`;
     }).filter(Boolean)
   ];
-  return c && m.push("base64"), (m.length > 0 || u && u !== DATA_URL_DEFAULT_MIME_TYPE) && m.unshift(u), `data:${m.join(";")},${c ? s.trim() : s}${o ? `#${o}` : ""}`;
+  return c && m.push("base64"), (m.length > 0 || u && u !== DATA_URL_DEFAULT_MIME_TYPE) && m.unshift(u), `data:${m.join(";")},${c ? s.trim() : s}${a ? `#${a}` : ""}`;
 };
 function normalizeUrl(r, e) {
   if (e = {
@@ -438,17 +436,17 @@ function normalizeUrl(r, e) {
   if (e.forceHttp && e.forceHttps)
     throw new Error("The `forceHttp` and `forceHttps` options cannot be used together");
   if (e.forceHttp && s.protocol === "https:" && (s.protocol = "http:"), e.forceHttps && s.protocol === "http:" && (s.protocol = "https:"), e.stripAuthentication && (s.username = "", s.password = ""), e.stripHash ? s.hash = "" : e.stripTextFragment && (s.hash = s.hash.replace(/#?:~:text.*?$/i, "")), s.pathname) {
-    const a = /\b[a-z][a-z\d+\-.]{1,50}:\/\//g;
+    const o = /\b[a-z][a-z\d+\-.]{1,50}:\/\//g;
     let c = 0, u = "";
     for (; ; ) {
-      const m = a.exec(s.pathname);
+      const m = o.exec(s.pathname);
       if (!m)
         break;
-      const b = m[0], k = m.index, y = s.pathname.slice(c, k);
-      u += y.replace(/\/{2,}/g, "/"), u += b, c = k + b.length;
+      const E = m[0], v = m.index, k = s.pathname.slice(c, v);
+      u += k.replace(/\/{2,}/g, "/"), u += E, c = v + E.length;
     }
-    const R = s.pathname.slice(c, s.pathname.length);
-    u += R.replace(/\/{2,}/g, "/"), s.pathname = u;
+    const L = s.pathname.slice(c, s.pathname.length);
+    u += L.replace(/\/{2,}/g, "/"), s.pathname = u;
   }
   if (s.pathname)
     try {
@@ -456,16 +454,16 @@ function normalizeUrl(r, e) {
     } catch {
     }
   if (e.removeDirectoryIndex === !0 && (e.removeDirectoryIndex = [/^index\.[a-z]+$/]), Array.isArray(e.removeDirectoryIndex) && e.removeDirectoryIndex.length > 0) {
-    let a = s.pathname.split("/");
-    const c = a[a.length - 1];
-    testParameter(c, e.removeDirectoryIndex) && (a = a.slice(0, -1), s.pathname = a.slice(1).join("/") + "/");
+    let o = s.pathname.split("/");
+    const c = o[o.length - 1];
+    testParameter(c, e.removeDirectoryIndex) && (o = o.slice(0, -1), s.pathname = o.slice(1).join("/") + "/");
   }
   if (s.hostname && (s.hostname = s.hostname.replace(/\.$/, ""), e.stripWWW && /^www\.(?!www\.)[a-z\-\d]{1,63}\.[a-z.\-\d]{2,63}$/.test(s.hostname) && (s.hostname = s.hostname.replace(/^www\./, ""))), Array.isArray(e.removeQueryParameters))
-    for (const a of [...s.searchParams.keys()])
-      testParameter(a, e.removeQueryParameters) && s.searchParams.delete(a);
+    for (const o of [...s.searchParams.keys()])
+      testParameter(o, e.removeQueryParameters) && s.searchParams.delete(o);
   if (!Array.isArray(e.keepQueryParameters) && e.removeQueryParameters === !0 && (s.search = ""), Array.isArray(e.keepQueryParameters) && e.keepQueryParameters.length > 0)
-    for (const a of [...s.searchParams.keys()])
-      testParameter(a, e.keepQueryParameters) || s.searchParams.delete(a);
+    for (const o of [...s.searchParams.keys()])
+      testParameter(o, e.keepQueryParameters) || s.searchParams.delete(o);
   if (e.sortQueryParameters) {
     s.searchParams.sort();
     try {
@@ -474,8 +472,8 @@ function normalizeUrl(r, e) {
     }
   }
   e.removeTrailingSlash && (s.pathname = s.pathname.replace(/\/$/, "")), e.removeExplicitPort && s.port && (s.port = "");
-  const o = r;
-  return r = s.toString(), !e.removeSingleSlash && s.pathname === "/" && !o.endsWith("/") && s.hash === "" && (r = r.replace(/\/$/, "")), (e.removeTrailingSlash || s.pathname === "/") && s.hash === "" && e.removeSingleSlash && (r = r.replace(/\/$/, "")), t && !e.normalizeProtocol && (r = r.replace(/^http:\/\//, "//")), e.stripProtocol && (r = r.replace(/^(?:https?:)?\/\//, "")), r;
+  const a = r;
+  return r = s.toString(), !e.removeSingleSlash && s.pathname === "/" && !a.endsWith("/") && s.hash === "" && (r = r.replace(/\/$/, "")), (e.removeTrailingSlash || s.pathname === "/") && s.hash === "" && e.removeSingleSlash && (r = r.replace(/\/$/, "")), t && !e.normalizeProtocol && (r = r.replace(/^http:\/\//, "//")), e.stripProtocol && (r = r.replace(/^(?:https?:)?\/\//, "")), r;
 }
 function urlMatches(r, e) {
   let t = !1;
@@ -486,43 +484,43 @@ function headersMatches(r, e) {
   if (Object.keys(r).length == 0)
     return !0;
   for (const s of Object.keys(r)) {
-    const o = r[s], a = e.get(s);
-    if (a == null)
+    const a = r[s], o = e.get(s);
+    if (o == null)
       return !1;
-    if (o === !0)
+    if (a === !0)
       return !0;
-    if (o instanceof URL ? t = normalizeUrl(o.href) == normalizeUrl(a) : o instanceof RegExp ? t = o.test(a) : t = String(o) == a, !t)
+    if (a instanceof URL ? t = normalizeUrl(a.href) == normalizeUrl(o) : a instanceof RegExp ? t = a.test(o) : t = String(a) == o, !t)
       return !1;
   }
   return t;
 }
 function fetchInterceptorFactory(r, e) {
   return async function(n, s) {
-    const o = new Request(n, s), a = r.interceptRequest(o);
-    return a.blocked ? Response.error() : e(a).then((c) => r.interceptResponse(c));
+    const a = new Request(n, s), o = r.interceptRequest(a);
+    return o.blocked ? Response.error() : e(o).then((c) => r.interceptResponse(c));
   };
 }
-var v, g, M, L, T, F;
+var T, g, x, P, R, F;
 class NetworkInterceptor {
   constructor({ global: e = globalThis, fetchKey: t = "fetch", xmlHttpRequestKey: n = "XMLHttpRequest" } = {}) {
-    p(this, v, []);
+    p(this, T, []);
     p(this, g, []);
-    p(this, M, void 0);
-    p(this, L, void 0);
-    p(this, T, void 0);
+    p(this, x, void 0);
+    p(this, P, void 0);
+    p(this, R, void 0);
     p(this, F, void 0);
-    l(this, M, e[t]), l(this, L, e[t] = fetchInterceptorFactory(this, i(this, M))), l(this, T, e[n]), l(this, F, e[n]);
+    h(this, x, e[t]), h(this, P, e[t] = fetchInterceptorFactory(this, i(this, x))), h(this, R, e[n]), h(this, F, e[n]);
   }
   get windowFetch() {
-    return i(this, M);
+    return i(this, x);
   }
   get patchedFetch() {
-    return i(this, L);
+    return i(this, P);
   }
   interceptRequest(e) {
     let t = e;
     t.blocked = !1;
-    for (const n of i(this, v))
+    for (const n of i(this, T))
       if (urlMatches(n.url, t.url) && headersMatches(n.headers, t.headers)) {
         if (n.block) {
           t.blocked = !0;
@@ -540,51 +538,51 @@ class NetworkInterceptor {
     return t;
   }
   addRule(e, t, n, s) {
-    let o;
+    let a;
     if (e.constructor == Object) {
-      if (o = e, !o.type)
+      if (a = e, !a.type)
         throw new TypeError("missing type option");
-      if (!o.callback)
+      if (!a.callback)
         throw new TypeError("missing callback option");
     } else
-      o = {
+      a = {
         type: e,
         url: t,
         callback: n,
         ...s
       };
-    return o.headers ?? (o.headers = {}), o.type == "request" ? i(this, v).push(o) : o.type == "response" && i(this, g).push(o), o;
+    return a.headers ?? (a.headers = {}), a.type == "request" ? i(this, T).push(a) : a.type == "response" && i(this, g).push(a), a;
   }
   removeRule(e) {
     if (e.type == "request") {
-      const t = i(this, v).findIndex((n) => n == e);
-      i(this, v).splice(t, 1);
+      const t = i(this, T).findIndex((n) => n == e);
+      i(this, T).splice(t, 1);
     } else {
       const t = i(this, g).findIndex((n) => n == e);
       i(this, g).splice(t, 1);
     }
   }
   clearRules() {
-    i(this, v).length = 0, i(this, g).length = 0;
+    i(this, T).length = 0, i(this, g).length = 0;
   }
   patchFetch() {
-    window.fetch = i(this, L);
+    window.fetch = i(this, P);
   }
   restoreFetch() {
-    window.fetch = i(this, M);
+    window.fetch = i(this, x);
   }
 }
-v = new WeakMap(), g = new WeakMap(), M = new WeakMap(), L = new WeakMap(), T = new WeakMap(), F = new WeakMap();
+T = new WeakMap(), g = new WeakMap(), x = new WeakMap(), P = new WeakMap(), R = new WeakMap(), F = new WeakMap();
 export {
   HTMLEntityMap,
-  JobErrorEvent,
-  JobFinishedEvent,
-  JobNotFound,
   NetworkInterceptor,
-  WorkerDeadState,
-  WorkerJQ,
-  WorkerScriptError,
-  WorkerUnreponsiveError,
+  TaskErrorEvent,
+  TaskFulfilledEvent,
+  TaskNotFound,
+  Tasker,
+  TaskerDeadState,
+  TaskerScriptError,
+  TaskerUnreponsiveError,
   awaitDomContentLoaded,
   escapeHTML,
   escapeRegExp,
